@@ -10,7 +10,7 @@
         h2 { text-align: center; color: #333; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        input[type="text"], textarea, input[type="file"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         .btn-salvar { width: 100%; padding: 10px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
         .btn-cancelar { display: block; text-align: center; margin-top: 10px; color: #f44336; text-decoration: none; }
     </style>
@@ -20,7 +20,7 @@
     <div class="form-container">
         <h2>Cadastrar Novo Doce</h2>
         
-        <form action="/admin/salvar" method="POST">
+        <form action="/admin/salvar" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="nome">Nome do Doce:</label>
                 <input type="text" id="nome" name="nome" placeholder="Ex: Bolo de Pote de Morango" required>
@@ -34,6 +34,11 @@
             <div class="form-group">
                 <label for="preco">Preço (R$):</label>
                 <input type="text" id="preco" name="preco" placeholder="Ex: 15,50" required pattern="[0-9]+([,\.][0-9]+)?">
+            </div>
+
+            <div class="form-group">
+                <label for="imagem">Foto do Doce:</label>
+                <input type="file" id="imagem" name="imagem" accept="image/*" required style="padding: 8px; border: 1px dashed #ccc; background: #fafafa;">
             </div>
             
             <button type="submit" class="btn-salvar">Salvar no Cardápio</button>

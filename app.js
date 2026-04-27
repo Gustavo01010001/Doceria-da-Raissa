@@ -18,7 +18,7 @@ app.use(session({
     saveUninitialized: true
 }));
 
-// Importando as rotas que criamos nas outras pastas
+// Importando as rotas que criamos nas outras pastasnpm install multer
 const lojaRoutes = require('./routes/lojaRoutes');
 const carrinhoRoutes = require('./routes/carrinhoRoutes');
 const adminRoutes = require('./routes/adminRoutes');
