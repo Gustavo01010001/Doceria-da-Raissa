@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doceria - Faça seu Pedido</title>
+    
+    <style>
+        /* Cores Base e Tipografia */
+        :root {
+            --cor-primaria: #e91e63;
+            --cor-secundaria: #ffb6c1;
+            --cor-fundo: #fcf9f2;
+            --cor-texto: #333;
+            --sombra: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+        }
+
+        /* Cabeçalho */
+        header {
+            background-color: var(--cor-secundaria);
+            /* O padding do topo (55px) empurra o texto pra baixo para não bater no botão */
+            padding: 55px 20px 20px 20px; 
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative; 
+        }
+
+        /* Link de Admin no Topo Direito */
+        .link-admin {
+            position: absolute;
+            top: 15px; 
+            right: 15px;
+            color: #d81b60;
+            text-decoration: none;
+            font-size: 13px; /* Fonte um pouquinho menor no celular */
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 6px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra suave para destacar */
+            transition: background 0.2s;
+        }
+
+        .link-admin:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        header h1 {
+            margin: 0 0 10px 0;
+            color: #d81b60;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 0;
+            color: #555;
+            font-size: 16px;
+        }
+
+        /* Container Principal */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .container h2 {
+            text-align: center;
+            color: #d81b60;
+            margin-bottom: 30px;
+            font-size: 24px;
+            border-bottom: 2px solid var(--cor-secundaria);
+            display: inline-block;
+            padding-bottom: 5px;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* O Segredo do Layout: CSS Grid */
+        .grid-cardapio {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: 1fr; 
+        }
+
+        /* Cards de Produto */
+        .produto-card {
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--sombra);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .produto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .produto-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .produto-card p {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 15px 0;
+            line-height: 1.4;
+        }
+
+        .preco {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--cor-primaria) !important;
+            margin-bottom: 15px !important;
+        }
+
+        /* Botão Menor e Mais Elegante */
+        form { margin: 0; }
+
+        .btn-comprar {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            background-color: var(--cor-primaria);
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 25px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-comprar:hover {
+            background-color: #d81b60;
+        }
+
+        /* ADAPTAÇÃO PARA PC */
+        @media (min-width: 768px) {
+            .grid-cardapio {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="/login" class="link-admin">🔒 Admin</a>
+        
+        <h1>Doceria da Chef</h1>
+        <p>Faça seu pedido online!</p>
+    </header>
+
+    <div class="container">
+        <h2>Nosso Cardápio</h2>
+        
+        <div class="grid-cardapio">
+            <% if (produtos.length > 0) { %>
+                <% produtos.forEach(function(produto) { %>
+                    <div class="produto-card">
+                        <div>
+                            <h3><%= produto.nome %></h3>
+                            <p><%= produto.descricao %></p>
+                            <p class="preco">R$ <%= produto.preco.toFixed(2).replace('.', ',') %></p>
+                        </div>
+                        
+                        <form action="/carrinho/adicionar" method="POST">
+                            <input type="hidden" name="produtoId" value="<%= produto.id %>">
+                            <button type="submit" class="btn-comprar">Adicionar ao Carrinho</button>
+                        </form>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <p style="text-align: center; width: 100%;">Nenhum produto cadastrado ainda.</p>
+            <% } %>
+        </div> 
+    </div>
+
+</body>
+</html>

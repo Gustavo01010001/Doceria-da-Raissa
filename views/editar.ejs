@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Doce</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
+        .form-container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-atualizar { width: 100%; padding: 10px; background-color: #2196F3; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        .btn-cancelar { display: block; text-align: center; margin-top: 10px; color: #f44336; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Editar: <%= produto.nome %></h2>
+        
+        <form action="/admin/atualizar" method="POST">
+            <input type="hidden" name="id" value="<%= produto.id %>">
+
+            <div class="form-group">
+                <label for="nome">Nome do Doce:</label>
+                <input type="text" id="nome" name="nome" value="<%= produto.nome %>" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="descricao">Descrição:</label>
+                <textarea id="descricao" name="descricao" rows="3" required><%= produto.descricao %></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="preco">Preço (R$):</label>
+                <input type="text" id="preco" name="preco" value="<%= produto.preco.toFixed(2).replace('.', ',') %>" required pattern="[0-9]+([,\.][0-9]+)?">
+            </div>
+            
+            <button type="submit" class="btn-atualizar">Salvar Alterações</button>
+            <a href="/admin" class="btn-cancelar">Cancelar</a>
+        </form>
+    </div>
+
+</body>
+</html>

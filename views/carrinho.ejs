@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seu Carrinho</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #fcf9f2; color: #333; }
+        header { background-color: #ffb6c1; padding: 20px; text-align: center; }
+        .container { padding: 15px; }
+        .item-carrinho { background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .total { font-size: 20px; font-weight: bold; text-align: right; margin-top: 20px; color: #e91e63; margin-bottom: 20px; }
+        .btn-voltar, .btn-finalizar { display: block; width: 100%; padding: 12px; text-align: center; text-decoration: none; border-radius: 5px; margin-top: 10px; font-size: 16px; border: none; cursor: pointer; box-sizing: border-box; }
+        .btn-voltar { background-color: #ccc; color: #333; }
+        .btn-finalizar { background-color: #4CAF50; color: white; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Seu Carrinho</h1>
+    </header>
+
+    <div class="container">
+        <% if (carrinho.length > 0) { %>
+            
+            <% carrinho.forEach(function(item) { %>
+                <div class="item-carrinho">
+                    <span><%= item.quantidade %>x <%= item.nome %></span>
+                    <strong>R$ <%= (item.preco * item.quantidade).toFixed(2).replace('.', ',') %></strong>
+                </div>
+            <% }); %>
+            
+            <div class="total">
+                Total: R$ <%= total.toFixed(2).replace('.', ',') %>
+            </div>
+
+            <% 
+                let mensagem = "Olá! Gostaria de fazer o seguinte pedido:%0A%0A";
+                carrinho.forEach(function(item) {
+                    let subtotal = (item.preco * item.quantidade).toFixed(2).replace('.', ',');
+                    // A mensagem do WhatsApp também vai com a quantidade e o subtotal
+                    mensagem += `- ${item.quantidade}x ${item.nome} (R$ ${subtotal})%0A`;
+                });
+                mensagem += `%0A*Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
+                
+                // O número tem que ter 55 (Brasil) + DDD + Número
+                let numeroZap = "5518996516732";
+                let linkWhatsApp = `https://wa.me/${numeroZap}?text=${mensagem}`;
+            %>
+
+            <a href="<%= linkWhatsApp %>" target="_blank" class="btn-finalizar">Finalizar Pedido via WhatsApp</a>
+            
+            <form action="/carrinho/limpar" method="POST" style="margin-top: 10px;">
+                <button type="submit" class="btn-voltar" style="background-color: #ff9800; color: white;">Esvaziar Carrinho</button>
+            </form>
+
+        <% } else { %>
+            <p style="text-align: center;">Seu carrinho está vazio. Que tal escolher um doce?</p>
+        <% } %>
+
+        <a href="/" class="btn-voltar">Voltar ao Cardápio</a>
+    </div>
+
+</body>
+</html>

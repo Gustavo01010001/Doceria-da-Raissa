@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Administrativo - Doceria</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        
+        /* Topo do Painel */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .admin-header h1 { margin: 0; color: #333; font-size: 22px; }
+        
+        /* Botões Gerais */
+        .btn-novo { display: inline-block; padding: 10px 15px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
+        .btn-logout { background-color: #666; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; transition: background 0.2s; }
+        .btn-logout:hover { background-color: #333; }
+        
+        /* Tabela */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f8f8; color: #555; }
+        
+        /* Botões de Ação na Tabela */
+        .acoes-flex { display: flex; gap: 8px; align-items: center; }
+        
+        .btn-editar { background-color: #2196F3; color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px; font-size: 13px; transition: 0.2s; }
+        .btn-editar:hover { background-color: #0b7dda; }
+
+        .btn-excluir { background-color: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .btn-excluir:hover { background-color: #d32f2f; }
+        
+        .footer-links { text-align: center; margin-top: 20px; }
+        .footer-links a { color: #888; text-decoration: none; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="admin-header">
+            <h1>Painel Gerencial 👩‍🍳</h1>
+            <a href="/logout" class="btn-logout">Sair do Painel</a>
+        </div>
+        
+        <a href="/admin/cadastrar" class="btn-novo">+ Adicionar Novo Doce</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (produtos.length > 0) { %>
+                    <% produtos.forEach(function(produto) { %>
+                        <tr>
+                            <td><%= produto.nome %></td>
+                            <td>R$ <%= produto.preco.toFixed(2).replace('.', ',') %></td>
+                            <td>
+                                <div class="acoes-flex">
+                                    <a href="/admin/editar/<%= produto.id %>" class="btn-editar">Editar</a>
+                                    
+                                    <form action="/admin/excluir" method="POST" onsubmit="return confirm('Deseja mesmo excluir este doce?');" style="margin:0;">
+                                        <input type="hidden" name="id" value="<%= produto.id %>">
+                                        <button type="submit" class="btn-excluir">Excluir</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 30px; color: #999;">Nenhum doce cadastrado no cardápio.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+        
+        <div class="footer-links">
+            <a href="/" target="_blank">👁️ Ver loja como cliente</a>
+        </div>
+    </div>
+</body>
+</html>
