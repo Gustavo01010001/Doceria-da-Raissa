@@ -1,10 +1,10 @@
-const initDB = require('../config/db');
+const Produto = require('../models/produtoModel'); // Substituímos o initDB pelo Model
 
 const adicionarAoCarrinho = async (req, res) => {
     const produtoId = parseInt(req.body.produtoId);
     try {
-        const db = await initDB();
-        const produto = await db.get('SELECT * FROM produtos WHERE id = ?', [produtoId]);
+  
+        const produto = await Produto.buscarPorId(produtoId);
         
         if (produto) {
             if (!req.session.carrinho) req.session.carrinho = [];
@@ -19,6 +19,7 @@ const adicionarAoCarrinho = async (req, res) => {
         }
         res.redirect('/carrinho');
     } catch (error) {
+        console.error(error);
         res.status(500).send("Erro ao adicionar ao carrinho");
     }
 };

@@ -1,11 +1,11 @@
-const initDB = require('../config/db');
+const Produto = require('../models/produtoModel');
 
 const exibirPainel = async (req, res) => {
     try {
-        const db = await initDB();
-        const produtos = await db.all('SELECT * FROM produtos');
+        const produtos = await Produto.buscarTodos();
         res.render('admin', { produtos });
     } catch (error) {
+        console.error(error);
         res.status(500).send("Erro ao carregar painel");
     }
 };
@@ -20,13 +20,10 @@ const salvarProduto = async (req, res) => {
     const imagemCaminho = req.file ? '/uploads/' + req.file.filename : null;
 
     try {
-        const db = await initDB();
-        await db.run(
-            'INSERT INTO produtos (nome, descricao, preco, imagem) VALUES (?, ?, ?, ?)', 
-            [nome, descricao, precoFormatado, imagemCaminho]
-        );
+        await Produto.criar(nome, descricao, precoFormatado, imagemCaminho);
         res.redirect('/admin');
     } catch (error) {
+        console.error(error);
         res.status(500).send("Erro ao salvar produto");
     }
 };
@@ -34,10 +31,10 @@ const salvarProduto = async (req, res) => {
 const exibirEdicao = async (req, res) => {
     const { id } = req.params;
     try {
-        const db = await initDB();
-        const produto = await db.get('SELECT * FROM produtos WHERE id = ?', [id]);
+        const produto = await Produto.buscarPorId(id);
         res.render('editar', { produto });
     } catch (error) {
+        console.error(error);
         res.status(500).send("Erro ao carregar edição");
     }
 };
@@ -45,14 +42,12 @@ const exibirEdicao = async (req, res) => {
 const atualizarProduto = async (req, res) => {
     const { id, nome, descricao, preco } = req.body;
     const precoFormatado = parseFloat(preco.replace(',', '.'));
+    
     try {
-        const db = await initDB();
-        await db.run(
-            'UPDATE produtos SET nome = ?, descricao = ?, preco = ? WHERE id = ?', 
-            [nome, descricao, precoFormatado, id]
-        );
+        await Produto.atualizar(id, nome, descricao, precoFormatado);
         res.redirect('/admin');
     } catch (error) {
+        console.error(error);
         res.status(500).send("Erro ao atualizar");
     }
 };
@@ -60,10 +55,10 @@ const atualizarProduto = async (req, res) => {
 const excluirProduto = async (req, res) => {
     const { id } = req.body;
     try {
-        const db = await initDB();
-        await db.run('DELETE FROM produtos WHERE id = ?', [id]);
+         await Produto.excluir(id);
         res.redirect('/admin');
     } catch (error) {
+        console.error(error);
         res.status(500).send("Erro ao excluir");
     }
 };
