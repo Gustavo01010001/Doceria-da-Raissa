@@ -1,4 +1,3 @@
-// controllers/adminController.js
 const initDB = require('../config/db');
 
 const exibirPainel = async (req, res) => {

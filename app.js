@@ -1,4 +1,3 @@
-// app.js
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
@@ -18,12 +17,10 @@ app.use(session({
     saveUninitialized: true
 }));
 
-// Importando as rotas que criamos nas outras pastasnpm install multer
 const lojaRoutes = require('./routes/lojaRoutes');
 const carrinhoRoutes = require('./routes/carrinhoRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
-// Avisando o Express para usar essas rotas
 app.use('/', lojaRoutes);
 app.use('/carrinho', carrinhoRoutes);
 app.use('/admin', adminRoutes);

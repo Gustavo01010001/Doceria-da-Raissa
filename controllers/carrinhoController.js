@@ -1,4 +1,3 @@
-// controllers/carrinhoController.js
 const initDB = require('../config/db');
 
 const adicionarAoCarrinho = async (req, res) => {

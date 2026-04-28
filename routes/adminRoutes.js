@@ -1,10 +1,8 @@
-// routes/adminRoutes.js
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const { verificarLogin } = require('../middlewares/auth');
 
-// Configuração do Multer (permanece aqui por ser um middleware de recepção)
 const multer = require('multer');
 const path = require('path');
 const storage = multer.diskStorage({
@@ -13,7 +11,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Rotas usando o Controlador
 router.get('/', verificarLogin, adminController.exibirPainel);
 router.get('/cadastrar', verificarLogin, adminController.exibirCadastro);
 router.post('/salvar', verificarLogin, upload.single('imagem'), adminController.salvarProduto);

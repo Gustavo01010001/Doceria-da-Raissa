@@ -1,4 +1,3 @@
-// Exemplo de como deve ficar a parte do CREATE TABLE no seu config/db.js:
 await db.exec(`
     CREATE TABLE IF NOT EXISTS produtos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
