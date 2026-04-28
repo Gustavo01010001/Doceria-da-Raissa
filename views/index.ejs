@@ -23,29 +23,26 @@
             color: var(--cor-texto);
         }
 
-        /* Cabeçalho */
         header {
             background-color: var(--cor-secundaria);
-            /* O padding do topo (55px) empurra o texto pra baixo para não bater no botão */
             padding: 55px 20px 20px 20px; 
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             position: relative; 
         }
 
-        /* Link de Admin no Topo Direito */
         .link-admin {
             position: absolute;
             top: 15px; 
             right: 15px;
             color: #d81b60;
             text-decoration: none;
-            font-size: 13px; /* Fonte um pouquinho menor no celular */
+            font-size: 13px;
             font-weight: bold;
             background-color: rgba(255, 255, 255, 0.7);
             padding: 6px 12px;
             border-radius: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra suave para destacar */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: background 0.2s;
         }
 
@@ -53,19 +50,9 @@
             background-color: rgba(255, 255, 255, 1);
         }
 
-        header h1 {
-            margin: 0 0 10px 0;
-            color: #d81b60;
-            font-size: 28px;
-        }
+        header h1 { margin: 0 0 10px 0; color: #d81b60; font-size: 28px; }
+        header p { margin: 0; color: #555; font-size: 16px; }
 
-        header p {
-            margin: 0;
-            color: #555;
-            font-size: 16px;
-        }
-
-        /* Container Principal */
         .container {
             max-width: 1100px;
             margin: 0 auto;
@@ -85,23 +72,22 @@
             transform: translateX(-50%);
         }
 
-        /* O Segredo do Layout: CSS Grid */
         .grid-cardapio {
             display: grid;
             gap: 20px;
             grid-template-columns: 1fr; 
         }
 
-        /* Cards de Produto */
+        /* Ajustes no Card para receber a foto */
         .produto-card {
             background-color: #fff;
             border-radius: 12px;
-            padding: 20px;
             box-shadow: var(--sombra);
             transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            overflow: hidden; /* Faz a imagem respeitar as bordas arredondadas do card */
         }
 
         .produto-card:hover {
@@ -109,27 +95,37 @@
             box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
 
-        .produto-card h3 {
-            margin: 0 0 10px 0;
-            font-size: 18px;
-            color: #333;
+        /* Estilo da Imagem do Doce */
+        .produto-img {
+            width: 100%;
+            height: 200px; /* Altura fixa para todas as fotos ficarem iguais */
+            object-fit: cover; /* Corta a imagem direitinho sem achatar ou esticar */
         }
 
-        .produto-card p {
+        /* Se o doce não tiver foto, mostramos isso aqui */
+        .produto-sem-foto {
+            width: 100%;
+            height: 200px;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
             font-size: 14px;
-            color: #666;
-            margin: 0 0 15px 0;
-            line-height: 1.4;
         }
 
-        .preco {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--cor-primaria) !important;
-            margin-bottom: 15px !important;
+        /* Container dos textos do card */
+        .produto-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Faz o botão sempre ser empurrado pro fundo */
         }
 
-        /* Botão Menor e Mais Elegante */
+        .produto-info h3 { margin: 0 0 10px 0; font-size: 18px; color: #333; }
+        .produto-info p { font-size: 14px; color: #666; margin: 0 0 15px 0; line-height: 1.4; }
+        .preco { font-size: 18px; font-weight: 700; color: var(--cor-primaria) !important; margin-bottom: 15px !important; }
+
         form { margin: 0; }
 
         .btn-comprar {
@@ -147,11 +143,8 @@
             transition: background-color 0.2s;
         }
 
-        .btn-comprar:hover {
-            background-color: #d81b60;
-        }
+        .btn-comprar:hover { background-color: #d81b60; }
 
-        /* ADAPTAÇÃO PARA PC */
         @media (min-width: 768px) {
             .grid-cardapio {
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -163,7 +156,6 @@
 
     <header>
         <a href="/login" class="link-admin">🔒 Admin</a>
-        
         <h1>Doceria da Chef</h1>
         <p>Faça seu pedido online!</p>
     </header>
@@ -175,16 +167,25 @@
             <% if (produtos.length > 0) { %>
                 <% produtos.forEach(function(produto) { %>
                     <div class="produto-card">
-                        <div>
-                            <h3><%= produto.nome %></h3>
-                            <p><%= produto.descricao %></p>
-                            <p class="preco">R$ <%= produto.preco.toFixed(2).replace('.', ',') %></p>
-                        </div>
                         
-                        <form action="/carrinho/adicionar" method="POST">
-                            <input type="hidden" name="produtoId" value="<%= produto.id %>">
-                            <button type="submit" class="btn-comprar">Adicionar ao Carrinho</button>
-                        </form>
+                        <% if (produto.imagem) { %>
+                            <img src="<%= produto.imagem %>" alt="<%= produto.nome %>" class="produto-img">
+                        <% } else { %>
+                            <div class="produto-sem-foto">📷 Foto indisponível</div>
+                        <% } %>
+
+                        <div class="produto-info">
+                            <div>
+                                <h3><%= produto.nome %></h3>
+                                <p><%= produto.descricao %></p>
+                                <p class="preco">R$ <%= produto.preco.toFixed(2).replace('.', ',') %></p>
+                            </div>
+                            
+                            <form action="/carrinho/adicionar" method="POST" style="margin-top: auto;">
+                                <input type="hidden" name="produtoId" value="<%= produto.id %>">
+                                <button type="submit" class="btn-comprar">Adicionar ao Carrinho</button>
+                            </form>
+                        </div>
                     </div>
                 <% }); %>
             <% } else { %>
