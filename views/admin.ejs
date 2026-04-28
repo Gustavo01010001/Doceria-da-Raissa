@@ -3,91 +3,266 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo - Doceria</title>
+    <title>Dashboard - Doceria</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        
-        /* Topo do Painel */
-        .admin-header {
+        :root {
+            /* Paleta minimalista e profissional */
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --brand-color: #ec4899; /* Rosa moderno para detalhes */
+            --danger-bg: #fef2f2;
+            --danger-text: #ef4444;
+            --danger-hover: #fee2e2;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif; /* Fim da fonte genérica */
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Barra de Navegação Superior (App Feel) */
+        .topbar {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
-        .admin-header h1 { margin: 0; color: #333; font-size: 22px; }
-        
-        /* Botões Gerais */
-        .btn-novo { display: inline-block; padding: 10px 15px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin-bottom: 20px; font-weight: bold; }
-        .btn-logout { background-color: #666; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; font-size: 14px; transition: background 0.2s; }
-        .btn-logout:hover { background-color: #333; }
-        
-        /* Tabela */
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
-        th { background-color: #f8f8f8; color: #555; }
-        
-        /* Botões de Ação na Tabela */
-        .acoes-flex { display: flex; gap: 8px; align-items: center; }
-        
-        .btn-editar { background-color: #2196F3; color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px; font-size: 13px; transition: 0.2s; }
-        .btn-editar:hover { background-color: #0b7dda; }
 
-        .btn-excluir { background-color: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; transition: 0.2s; }
-        .btn-excluir:hover { background-color: #d32f2f; }
-        
-        .footer-links { text-align: center; margin-top: 20px; }
-        .footer-links a { color: #888; text-decoration: none; font-size: 14px; }
+        .topbar-logo {
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .topbar-logo i { color: var(--brand-color); font-size: 22px; }
+
+        .btn-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .btn-link:hover { color: var(--text-main); }
+
+        /* Container Principal */
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 32px;
+        }
+
+        .page-title h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .page-title p { margin: 4px 0 0 0; color: var(--text-muted); font-size: 14px; }
+
+        /* Botão Principal Estilo SaaS */
+        .btn-primary {
+            background-color: var(--text-main); /* Preto/Chumbo moderno */
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-primary:hover { background-color: #334155; }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Lista de Produtos Clean */
+        .lista-produtos {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .produto-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .produto-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+
+        .produto-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .img-wrapper {
+            width: 56px;
+            height: 56px;
+            border-radius: 8px;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .img-wrapper i { font-size: 24px; color: #94a3b8; }
+
+        .produto-detalhes h3 { margin: 0 0 4px 0; font-size: 15px; font-weight: 600; color: var(--text-main); }
+        .produto-detalhes .preco { margin: 0; color: var(--text-muted); font-size: 14px; font-weight: 500; }
+
+        .produto-acoes { display: flex; gap: 8px; }
+
+        /* Botões de Ação Secundários */
+        .btn-action {
+            background: white;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-action:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        /* Botão de Excluir discreto até passar o mouse */
+        .btn-action.delete { color: var(--danger-text); border-color: transparent; background: transparent; }
+        .btn-action.delete:hover { background: var(--danger-hover); border-color: var(--danger-hover); }
+
+        form { margin: 0; }
+
+        /* Mobile Perfeito */
+        @media (max-width: 640px) {
+            .page-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+            .btn-primary { width: 100%; justify-content: center; padding: 12px; }
+            .produto-item { flex-direction: column; align-items: stretch; gap: 16px; padding: 20px; }
+            .produto-acoes { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 4px; }
+            .btn-action { justify-content: center; padding: 10px; }
+            form { display: block; width: 100%; }
+            .btn-action.delete { width: 100%; border-color: var(--danger-hover); background: var(--danger-bg); }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="admin-header">
-            <h1>Painel Gerencial 👩‍🍳</h1>
-            <a href="/logout" class="btn-logout">Sair do Painel</a>
-        </div>
-        
-        <a href="/admin/cadastrar" class="btn-novo">+ Adicionar Novo Doce</a>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Preço</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (produtos.length > 0) { %>
-                    <% produtos.forEach(function(produto) { %>
-                        <tr>
-                            <td><%= produto.nome %></td>
-                            <td>R$ <%= produto.preco.toFixed(2).replace('.', ',') %></td>
-                            <td>
-                                <div class="acoes-flex">
-                                    <a href="/admin/editar/<%= produto.id %>" class="btn-editar">Editar</a>
-                                    
-                                    <form action="/admin/excluir" method="POST" onsubmit="return confirm('Deseja mesmo excluir este doce?');" style="margin:0;">
-                                        <input type="hidden" name="id" value="<%= produto.id %>">
-                                        <button type="submit" class="btn-excluir">Excluir</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    <% }); %>
-                <% } else { %>
-                    <tr>
-                        <td colspan="3" style="text-align: center; padding: 30px; color: #999;">Nenhum doce cadastrado no cardápio.</td>
-                    </tr>
-                <% } %>
-            </tbody>
-        </table>
-        
-        <div class="footer-links">
-            <a href="/" target="_blank">👁️ Ver loja como cliente</a>
+    <div class="topbar">
+        <div class="topbar-logo">
+            <i class="ph-fill ph-storefront"></i>
+            Painel da Chef
+        </div>
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <a href="/" class="btn-link"><i class="ph ph-eye"></i> Ver Loja</a>
+            <a href="/logout" class="btn-link"><i class="ph ph-sign-out"></i> Sair</a>
         </div>
     </div>
+
+    <div class="container">
+        
+        <div class="page-header">
+            <div class="page-title">
+                <h1>Gerenciar Cardápio</h1>
+                <p>Controle os doces que aparecem na vitrine</p>
+            </div>
+            
+            <a href="/admin/cadastrar" class="btn-primary">
+                <i class="ph-bold ph-plus"></i>
+                Novo Produto
+            </a>
+        </div>
+
+        <div class="lista-produtos">
+            <% if (produtos.length > 0) { %>
+                <% produtos.forEach(function(produto) { %>
+                    <div class="produto-item">
+                        
+                        <div class="produto-info">
+                            <div class="img-wrapper">
+                                <% if (produto.imagem) { %>
+                                    <img src="<%= produto.imagem %>" alt="<%= produto.nome %>">
+                                <% } else { %>
+                                    <i class="ph ph-image"></i>
+                                <% } %>
+                            </div>
+                            
+                            <div class="produto-detalhes">
+                                <h3><%= produto.nome %></h3>
+                                <p class="preco">R$ <%= produto.preco.toFixed(2).replace('.', ',') %></p>
+                            </div>
+                        </div>
+
+                        <div class="produto-acoes">
+                            <a href="/admin/editar/<%= produto.id %>" class="btn-action">
+                                <i class="ph ph-pencil-simple"></i> Editar
+                            </a>
+                            
+                            <form action="/admin/excluir" method="POST" onsubmit="return confirm('Tem certeza que deseja apagar este produto do cardápio?');">
+                                <input type="hidden" name="id" value="<%= produto.id %>">
+                                <button type="submit" class="btn-action delete">
+                                    <i class="ph ph-trash"></i> Excluir
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } else { %>
+                <div style="text-align: center; padding: 60px 20px; border: 1px dashed var(--border-color); border-radius: 12px; background: var(--card-bg); margin-top: 10px;">
+                    <i class="ph ph-cake" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px;"></i>
+                    <h3 style="margin: 0; font-size: 16px; color: var(--text-main);">Cardápio Vazio</h3>
+                    <p style="color: var(--text-muted); font-size: 14px; margin-top: 8px;">Adicione o seu primeiro doce para começar a vender.</p>
+                </div>
+            <% } %>
+        </div>
+
+    </div>
+
 </body>
 </html>
