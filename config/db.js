@@ -1,4 +1,3 @@
-// config/db.js
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
 
@@ -8,7 +7,6 @@ async function initDB() {
         driver: sqlite3.Database
     });
 
-    // AQUI ESTAVA A BOMBA! Agora adicionamos o 'imagem TEXT'
     await db.exec(`
         CREATE TABLE IF NOT EXISTS produtos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

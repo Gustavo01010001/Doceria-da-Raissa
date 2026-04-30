@@ -1,4 +1,4 @@
-const Produto = require('../models/produtoModel'); // Substituímos o initDB pelo Model
+const Produto = require('../models/produtoModel'); 
 
 const adicionarAoCarrinho = async (req, res) => {
     const produtoId = parseInt(req.body.produtoId);

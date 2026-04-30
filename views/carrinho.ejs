@@ -39,12 +39,11 @@
                 let mensagem = "Olá! Gostaria de fazer o seguinte pedido:%0A%0A";
                 carrinho.forEach(function(item) {
                     let subtotal = (item.preco * item.quantidade).toFixed(2).replace('.', ',');
-                    // A mensagem do WhatsApp também vai com a quantidade e o subtotal
+                   
                     mensagem += `- ${item.quantidade}x ${item.nome} (R$ ${subtotal})%0A`;
                 });
                 mensagem += `%0A*Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
-                
-                // O número tem que ter 55 (Brasil) + DDD + Número
+          
                 let numeroZap = "5518996516732";
                 let linkWhatsApp = `https://wa.me/${numeroZap}?text=${mensagem}`;
             %>
