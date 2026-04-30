@@ -27,6 +27,6 @@ app.use('/admin', adminRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Servidor rodando liso na porta ${PORT}`);
+    console.log(`Servidor rodando liso na porta que nem a minha pika${PORT}`);
     console.log(`Acesse: http://localhost:${PORT}`);
 });

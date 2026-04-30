@@ -6,7 +6,7 @@
     <title>Doceria - Faça seu Pedido</title>
     
     <style>
-        /* Cores Base e Tipografia */
+        
         :root {
             --cor-primaria: #e91e63;
             --cor-secundaria: #ffb6c1;
@@ -78,7 +78,6 @@
             grid-template-columns: 1fr; 
         }
 
-        /* Ajustes no Card para receber a foto */
         .produto-card {
             background-color: #fff;
             border-radius: 12px;
@@ -87,7 +86,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            overflow: hidden; /* Faz a imagem respeitar as bordas arredondadas do card */
+            overflow: hidden; 
         }
 
         .produto-card:hover {
@@ -95,14 +94,12 @@
             box-shadow: 0 8px 15px rgba(0,0,0,0.1);
         }
 
-        /* Estilo da Imagem do Doce */
         .produto-img {
             width: 100%;
-            height: 200px; /* Altura fixa para todas as fotos ficarem iguais */
-            object-fit: cover; /* Corta a imagem direitinho sem achatar ou esticar */
+            height: 200px; 
+            object-fit: cover; 
         }
 
-        /* Se o doce não tiver foto, mostramos isso aqui */
         .produto-sem-foto {
             width: 100%;
             height: 200px;
@@ -114,12 +111,11 @@
             font-size: 14px;
         }
 
-        /* Container dos textos do card */
         .produto-info {
             padding: 20px;
             display: flex;
             flex-direction: column;
-            flex-grow: 1; /* Faz o botão sempre ser empurrado pro fundo */
+            flex-grow: 1; 
         }
 
         .produto-info h3 { margin: 0 0 10px 0; font-size: 18px; color: #333; }

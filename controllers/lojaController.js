@@ -1,4 +1,4 @@
-const Produto = require('../models/produtoModel'); // Importamos o Model aqui
+const Produto = require('../models/produtoModel'); 
 
 const carregarVitrine = async (req, res) => {
     try {
