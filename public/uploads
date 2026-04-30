@@ -1,9 +1,0 @@
-await db.exec(`
-    CREATE TABLE IF NOT EXISTS produtos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT,
-        descricao TEXT,
-        preco REAL,
-        imagem TEXT
-    )
-`);
