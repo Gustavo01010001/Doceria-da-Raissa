@@ -4,61 +4,167 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seu Carrinho</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background-color: #fcf9f2; color: #333; }
-        header { background-color: #ffb6c1; padding: 20px; text-align: center; }
-        .container { padding: 15px; }
-        .item-carrinho { background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .total { font-size: 20px; font-weight: bold; text-align: right; margin-top: 20px; color: #e91e63; margin-bottom: 20px; }
-        .btn-voltar, .btn-finalizar { display: block; width: 100%; padding: 12px; text-align: center; text-decoration: none; border-radius: 5px; margin-top: 10px; font-size: 16px; border: none; cursor: pointer; box-sizing: border-box; }
-        .btn-voltar { background-color: #ccc; color: #333; }
-        .btn-finalizar { background-color: #4CAF50; color: white; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+            margin: 0; 
+            padding: 0; 
+            color: #0f172a;
+        }
+
+        .header-rosa {
+            background-color: #ffb6c1; 
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .header-rosa h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .carrinho-container {
+            max-width: 600px; 
+            margin: 40px auto; 
+            padding: 0 20px;
+        }
+
+        .lista-itens {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            margin-bottom: 20px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 15px;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .total {
+            text-align: right;
+            font-size: 20px;
+            font-weight: 700;
+            color: #dc2626; 
+            margin: 20px 0;
+        }
+
+        /* AQUI ESTÁ A CORREÇÃO MÁGICA: */
+        .btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%; 
+            box-sizing: border-box; /* Segura o botão dentro da caixa! */
+            padding: 14px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        /* Isso resolve o problema do botão amarelo torto: */
+        form {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .btn:hover { opacity: 0.9; }
+
+        .btn-whatsapp { 
+            background-color: #22c55e; 
+            color: white; 
+        }
+
+        .btn-esvaziar { 
+            background-color: #f59e0b; 
+            color: white; 
+        }
+
+        .btn-voltar { 
+            background-color: #e2e8f0; 
+            color: #475569; 
+            margin-top: 24px;
+        }
+        
+        .carrinho-vazio {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Seu Carrinho</h1>
-    </header>
+    <div class="header-rosa">
+        <h1><i class="ph-fill ph-shopping-cart"></i> Seu Carrinho</h1>
+    </div>
 
-    <div class="container">
-        <% if (carrinho.length > 0) { %>
-            
-            <% carrinho.forEach(function(item) { %>
-                <div class="item-carrinho">
-                    <span><%= item.quantidade %>x <%= item.nome %></span>
-                    <strong>R$ <%= (item.preco * item.quantidade).toFixed(2).replace('.', ',') %></strong>
+    <div class="carrinho-container">
+        
+        <% if (carrinho && carrinho.length > 0) { %>
+            <div class="lista-itens">
+                <% let total = 0; %>
+                <% carrinho.forEach(item => { %>
+                    <div class="item">
+                        <span><%= item.quantidade %>x <%= item.nome %></span>
+                        <span>R$ <%= (item.preco * item.quantidade).toFixed(2).replace('.', ',') %></span>
+                    </div>
+                    <% total += item.preco * item.quantidade; %>
+                <% }) %>
+                
+                <div class="total">
+                    Total: R$ <%= total.toFixed(2).replace('.', ',') %>
                 </div>
-            <% }); %>
-            
-            <div class="total">
-                Total: R$ <%= total.toFixed(2).replace('.', ',') %>
             </div>
 
-            <% 
-                let mensagem = "Olá! Gostaria de fazer o seguinte pedido:%0A%0A";
-                carrinho.forEach(function(item) {
-                    let subtotal = (item.preco * item.quantidade).toFixed(2).replace('.', ',');
-                   
-                    mensagem += `- ${item.quantidade}x ${item.nome} (R$ ${subtotal})%0A`;
-                });
-                mensagem += `%0A*Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
-          
-                let numeroZap = "5518996516732";
-                let linkWhatsApp = `https://wa.me/${numeroZap}?text=${mensagem}`;
-            %>
-
-            <a href="<%= linkWhatsApp %>" target="_blank" class="btn-finalizar">Finalizar Pedido via WhatsApp</a>
+            <a href="/carrinho/finalizar" class="btn btn-whatsapp">
+                <i class="ph-bold ph-whatsapp-logo"></i> Finalizar Pedido via WhatsApp
+            </a>
             
-            <form action="/carrinho/limpar" method="POST" style="margin-top: 10px;">
-                <button type="submit" class="btn-voltar" style="background-color: #ff9800; color: white;">Esvaziar Carrinho</button>
+            <form action="/carrinho/esvaziar" method="POST">
+                <button type="submit" class="btn btn-esvaziar">
+                    <i class="ph-bold ph-trash"></i> Esvaziar Carrinho
+                </button>
             </form>
 
         <% } else { %>
-            <p style="text-align: center;">Seu carrinho está vazio. Que tal escolher um doce?</p>
+            <div class="carrinho-vazio">
+                <i class="ph-light ph-shopping-bag" style="font-size: 48px; margin-bottom: 10px;"></i>
+                <p>Seu carrinho está vazio.</p>
+            </div>
         <% } %>
 
-        <a href="/" class="btn-voltar">Voltar ao Cardápio</a>
+        <a href="/" class="btn btn-voltar">
+            <i class="ph-bold ph-arrow-left"></i> Voltar ao Cardápio
+        </a>
+
     </div>
 
 </body>

@@ -35,8 +35,35 @@ const limparCarrinho = (req, res) => {
     res.redirect('/carrinho');
 };
 
+const finalizarPedido = (req, res) => {
+    const carrinho = req.session.carrinho || [];
+
+    if (carrinho.length === 0) {
+        return res.redirect('/');
+    }
+
+    let texto = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
+    let total = 0;
+
+    carrinho.forEach(item => {
+        texto += `${item.quantidade}x ${item.nome} - R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}\n`;
+        total += (item.preco * item.quantidade);
+    });
+
+    texto += `\n*Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
+
+    const numeroWhatsApp = "5518996516732"; 
+
+    req.session.carrinho = [];
+    
+    const url = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(texto)}`;
+    res.redirect(url);
+};
+
+
 module.exports = {
     adicionarAoCarrinho,
     exibirCarrinho,
-    limparCarrinho
+    limparCarrinho,
+    finalizarPedido 
 };
