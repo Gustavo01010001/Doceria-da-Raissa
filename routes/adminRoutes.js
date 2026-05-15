@@ -24,9 +24,10 @@ const upload = multer({ storage: storage });
 
 router.get('/', verificarLogin, adminController.exibirPainel);
 router.get('/cadastrar', verificarLogin, adminController.exibirCadastro);
-router.post('/salvar', verificarLogin, upload.single('imagem'), adminController.salvarProduto);
 router.get('/editar/:id', verificarLogin, adminController.exibirEdicao);
-router.post('/atualizar', verificarLogin, adminController.atualizarProduto);
-router.post('/excluir', verificarLogin, adminController.excluirProduto);
+
+router.post('/salvar', verificarLogin, upload.single('imagem'), adminController.incluir);
+router.post('/atualizar', verificarLogin, upload.single('imagem'), adminController.alterar); 
+router.post('/excluir', verificarLogin, adminController.excluir);
 
 module.exports = router;

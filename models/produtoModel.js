@@ -1,40 +1,47 @@
 const initDB = require('../config/db');
 
-const Produto = {
+class Produto {
+    
+    constructor(id, nome, descricao, preco, imagem) {
+        this.id = id;
+        this.nome = nome;
+        this.descricao = descricao;
+        this.preco = preco;
+        this.imagem = imagem;
+    }
 
-    buscarTodos: async () => {
+    static async buscarTodos() {
         const db = await initDB();
         return await db.all('SELECT * FROM produtos');
-    },
+    }
 
-    buscarPorId: async (id) => {
+    static async buscarPorId(id) {
         const db = await initDB();
         return await db.get('SELECT * FROM produtos WHERE id = ?', [id]);
-    },
+    }
 
-    criar: async (nome, descricao, preco, imagem) => {
+    static async incluir(nome, descricao, preco, imagem) {
         const db = await initDB();
         return await db.run(
             'INSERT INTO produtos (nome, descricao, preco, imagem) VALUES (?, ?, ?, ?)',
             [nome, descricao, preco, imagem]
         );
-    },
+    }
 
-    atualizar: async (id, nome, descricao, preco) => {
+    static async alterar(id, nome, descricao, preco, imagem) {
         const db = await initDB();
         return await db.run(
-            'UPDATE produtos SET nome = ?, descricao = ?, preco = ? WHERE id = ?',
-            [nome, descricao, preco, id]
+            'UPDATE produtos SET nome = ?, descricao = ?, preco = ?, imagem = ? WHERE id = ?',
+            [nome, descricao, preco, imagem, id]
         );
-    },
+    }
 
-    excluir: async (id) => {
+    static async excluir(id) {
         const db = await initDB();
         return await db.run('DELETE FROM produtos WHERE id = ?', [id]);
-    },
+    }
 
-
-    verificarEPouparIniciais: async () => {
+    static async verificarEPouparIniciais() {
         const db = await initDB();
         const count = await db.get('SELECT COUNT(*) as total FROM produtos');
         
@@ -47,6 +54,6 @@ const Produto = {
             `);
         }
     }
-};
+}
 
 module.exports = Produto;
