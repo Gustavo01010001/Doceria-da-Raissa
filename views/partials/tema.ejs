@@ -1,0 +1,28 @@
+<button type="button" class="btn-tema" id="btn-tema" aria-label="Mudar tema"><i class="ph-bold ph-moon"></i></button>
+<script>
+    (function () {
+        const botao = document.getElementById('btn-tema');
+        const escuroDoSistema = window.matchMedia('(prefers-color-scheme: dark)');
+
+        function temaAtual() {
+            return document.documentElement.dataset.tema || (escuroDoSistema.matches ? 'escuro' : 'claro');
+        }
+
+        function atualizarBotao() {
+            const escuro = temaAtual() === 'escuro';
+            botao.innerHTML = escuro ? '<i class="ph-bold ph-sun"></i>' : '<i class="ph-bold ph-moon"></i>';
+            botao.setAttribute('aria-label', escuro ? 'Mudar para modo claro' : 'Mudar para modo escuro');
+            document.querySelector('meta[name="theme-color"]').content = escuro ? '#3d2530' : '#ffb6c1';
+        }
+
+        botao.addEventListener('click', () => {
+            const novoTema = temaAtual() === 'escuro' ? 'claro' : 'escuro';
+            document.documentElement.dataset.tema = novoTema;
+            try { localStorage.setItem('tema', novoTema); } catch (erro) {}
+            atualizarBotao();
+        });
+
+        escuroDoSistema.addEventListener('change', atualizarBotao);
+        atualizarBotao();
+    })();
+</script>

@@ -1,194 +1,172 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doceria - Faça seu Pedido</title>
-    
-    <style>
-        
-        :root {
-            --cor-primaria: #e91e63;
-            --cor-secundaria: #ffb6c1;
-            --cor-fundo: #fcf9f2;
-            --cor-texto: #333;
-            --sombra: 0 4px 6px rgba(0,0,0,0.05);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--cor-fundo);
-            color: var(--cor-texto);
-        }
-
-        header {
-            background-color: var(--cor-secundaria);
-            padding: 55px 20px 20px 20px; 
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: relative; 
-        }
-
-        .link-admin {
-            position: absolute;
-            top: 15px; 
-            right: 15px;
-            color: #d81b60;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: bold;
-            background-color: rgba(255, 255, 255, 0.7);
-            padding: 6px 12px;
-            border-radius: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: background 0.2s;
-        }
-
-        .link-admin:hover {
-            background-color: rgba(255, 255, 255, 1);
-        }
-
-        header h1 { margin: 0 0 10px 0; color: #d81b60; font-size: 28px; }
-        header p { margin: 0; color: #555; font-size: 16px; }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .container h2 {
-            text-align: center;
-            color: #d81b60;
-            margin-bottom: 30px;
-            font-size: 24px;
-            border-bottom: 2px solid var(--cor-secundaria);
-            display: inline-block;
-            padding-bottom: 5px;
-            position: relative;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .grid-cardapio {
-            display: grid;
-            gap: 20px;
-            grid-template-columns: 1fr; 
-        }
-
-        .produto-card {
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: var(--sombra);
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden; 
-        }
-
-        .produto-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-
-        .produto-img {
-            width: 100%;
-            height: 200px; 
-            object-fit: cover; 
-        }
-
-        .produto-sem-foto {
-            width: 100%;
-            height: 200px;
-            background-color: #eee;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            font-size: 14px;
-        }
-
-        .produto-info {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1; 
-        }
-
-        .produto-info h3 { margin: 0 0 10px 0; font-size: 18px; color: #333; }
-        .produto-info p { font-size: 14px; color: #666; margin: 0 0 15px 0; line-height: 1.4; }
-        .preco { font-size: 18px; font-weight: 700; color: var(--cor-primaria) !important; margin-bottom: 15px !important; }
-
-        form { margin: 0; }
-
-        .btn-comprar {
-            display: block;
-            width: 100%;
-            padding: 10px 15px;
-            background-color: var(--cor-primaria);
-            color: white;
-            text-align: center;
-            border: none;
-            border-radius: 25px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .btn-comprar:hover { background-color: #d81b60; }
-
-        @media (min-width: 768px) {
-            .grid-cardapio {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            }
-        }
-    </style>
+    <% const produtoComFoto = produtos.find(produto => produto.imagem); %>
+    <%- include('partials/head', { titulo: loja.nome + ' - Faça seu pedido', imagemPrevia: produtoComFoto && produtoComFoto.imagem }) %>
 </head>
 <body>
+    <%- include('partials/tema') %>
 
-    <header>
-        <a href="/login" class="link-admin">🔒 Admin</a>
-        <h1>Doceria da Chef</h1>
-        <p>Faça seu pedido online!</p>
+    <header class="topo">
+        <div class="topo-logo">🧁</div>
+        <h1><%= loja.nome %></h1>
+        <p><%= loja.slogan %></p>
+
+        <div class="topo-links">
+            <a href="https://wa.me/<%= loja.whatsapp %>" target="_blank" rel="noopener">
+                <i class="ph-bold ph-whatsapp-logo"></i> WhatsApp
+            </a>
+            <% if (loja.instagram) { %>
+                <a href="https://instagram.com/<%= loja.instagram %>" target="_blank" rel="noopener">
+                    <i class="ph-bold ph-instagram-logo"></i> @<%= loja.instagram %>
+                </a>
+            <% } %>
+        </div>
     </header>
 
-    <div class="container">
-        <h2>Nosso Cardápio</h2>
-        
+    <% const abas = [
+        { id: 'pronta', titulo: 'Pronta entrega', icone: 'ph-lightning', aviso: 'Já está pronto! É só pedir.', vazio: 'Nenhum doce a pronta entrega no momento.' },
+        { id: 'encomenda', titulo: 'Encomendas', icone: 'ph-calendar-heart', aviso: `Feitos sob encomenda. Peça com pelo menos ${loja.antecedenciaEncomenda} ${loja.antecedenciaEncomenda === 1 ? 'dia' : 'dias'} de antecedência.`, vazio: 'Nenhum doce sob encomenda no momento.' }
+    ]; %>
+
+    <main class="container">
+        <nav class="abas" role="tablist">
+            <% abas.forEach(aba => { %>
+                <a href="?aba=<%= aba.id %>" class="aba <%= abaAtiva === aba.id ? 'ativa' : '' %>" data-aba="<%= aba.id %>" role="tab" aria-selected="<%= abaAtiva === aba.id %>">
+                    <i class="ph-bold <%= aba.icone %>"></i> <%= aba.titulo %>
+                    <span class="aba-contador"><%= produtos.filter(produto => produto.tipo === aba.id).length %></span>
+                </a>
+            <% }) %>
+        </nav>
+
+        <% abas.forEach(aba => { %>
+        <% const produtosDaAba = produtos.filter(produto => produto.tipo === aba.id); %>
+        <section class="painel-aba" id="aba-<%= aba.id %>" role="tabpanel" <%= abaAtiva === aba.id ? '' : 'hidden' %>>
+        <p class="aviso-aba"><i class="ph-bold <%= aba.icone %>"></i> <%= aba.aviso %></p>
+
         <div class="grid-cardapio">
-            <% if (produtos.length > 0) { %>
-                <% produtos.forEach(function(produto) { %>
-                    <div class="produto-card">
-                        
-                        <% if (produto.imagem) { %>
-                            <img src="<%= produto.imagem %>" alt="<%= produto.nome %>" class="produto-img">
-                        <% } else { %>
-                            <div class="produto-sem-foto">📷 Foto indisponível</div>
-                        <% } %>
+            <% if (produtosDaAba.length > 0) { %>
+                <% produtosDaAba.forEach(function(produto) { %>
+                    <div class="produto-card <%= produto.disponivel ? '' : 'esgotado' %>">
+
+                        <div class="produto-foto">
+                            <% if (produto.imagem) { %>
+                                <img src="<%= produto.imagem %>" alt="<%= produto.nome %>" loading="lazy">
+                            <% } else { %>
+                                <div class="produto-sem-foto">🍰</div>
+                            <% } %>
+                            <% if (!produto.disponivel) { %>
+                                <span class="selo-esgotado"><%= aba.id === 'encomenda' ? 'Indisponível' : 'Esgotado' %></span>
+                            <% } %>
+                        </div>
 
                         <div class="produto-info">
-                            <div>
-                                <h3><%= produto.nome %></h3>
-                                <p><%= produto.descricao %></p>
-                                <p class="preco">R$ <%= produto.preco.toFixed(2).replace('.', ',') %></p>
-                            </div>
-                            
-                            <form action="/carrinho/adicionar" method="POST" style="margin-top: auto;">
+                            <h3><%= produto.nome %></h3>
+                            <% if (produto.descricao) { %>
+                                <p class="produto-descricao"><%= produto.descricao %></p>
+                            <% } %>
+                            <p class="produto-preco"><%= formatarPreco(produto.preco) %></p>
+
+                            <form action="/carrinho/adicionar" method="POST" class="form-comprar">
                                 <input type="hidden" name="produtoId" value="<%= produto.id %>">
-                                <button type="submit" class="btn-comprar">Adicionar ao Carrinho</button>
+                                <% if (produto.disponivel) { %>
+                                    <button type="submit" class="btn-comprar"><i class="ph-bold ph-plus"></i> <%= aba.id === 'encomenda' ? 'Encomendar' : 'Adicionar' %></button>
+                                <% } else { %>
+                                    <button type="button" class="btn-comprar" disabled><%= aba.id === 'encomenda' ? 'Indisponível' : 'Esgotado' %></button>
+                                <% } %>
                             </form>
                         </div>
                     </div>
                 <% }); %>
             <% } else { %>
-                <p style="text-align: center; width: 100%;">Nenhum produto cadastrado ainda.</p>
+                <div class="vazio">
+                    <i class="ph-light ph-cake"></i>
+                    <p><%= aba.vazio %></p>
+                </div>
             <% } %>
-        </div> 
+        </div>
+        </section>
+        <% }) %>
+    </main>
+
+    <footer class="rodape">
+        © <%= new Date().getFullYear() %> <%= loja.nome %> · <a href="/login">Área da chef</a>
+    </footer>
+
+    <div class="barra-carrinho" id="barra-carrinho" <%= quantidadeCarrinho > 0 ? '' : 'hidden' %>>
+        <a href="/carrinho">
+            <span class="contador">
+                <span id="qtd-carrinho"><%= quantidadeCarrinho %></span> Ver carrinho
+            </span>
+            <span id="total-carrinho"><%= formatarPreco(totalCarrinho) %></span>
+        </a>
     </div>
+
+    <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
+
+    <script>
+        const barra = document.getElementById('barra-carrinho');
+        const aviso = document.getElementById('aviso');
+        let timerAviso;
+
+        function mostrarAviso(texto) {
+            aviso.textContent = texto;
+            aviso.classList.add('visivel');
+            clearTimeout(timerAviso);
+            timerAviso = setTimeout(() => aviso.classList.remove('visivel'), 2200);
+        }
+
+        function atualizarBarra(dados) {
+            document.getElementById('qtd-carrinho').textContent = dados.quantidade;
+            document.getElementById('total-carrinho').textContent = 'R$ ' + dados.total.toFixed(2).replace('.', ',');
+            barra.hidden = dados.quantidade === 0;
+            barra.classList.remove('pulo');
+            void barra.offsetWidth; // reinicia a animação
+            barra.classList.add('pulo');
+        }
+
+        // Troca de aba sem recarregar a página (o link ?aba=... continua funcionando)
+        document.querySelectorAll('.aba').forEach(aba => {
+            aba.addEventListener('click', (evento) => {
+                evento.preventDefault();
+                document.querySelectorAll('.aba').forEach(outra => {
+                    const ativa = outra === aba;
+                    outra.classList.toggle('ativa', ativa);
+                    outra.setAttribute('aria-selected', ativa);
+                    document.getElementById('aba-' + outra.dataset.aba).hidden = !ativa;
+                });
+                history.replaceState(null, '', '?aba=' + aba.dataset.aba);
+            });
+        });
+
+        // Adiciona ao carrinho sem sair da página
+        document.querySelectorAll('.form-comprar').forEach(form => {
+            form.addEventListener('submit', async (evento) => {
+                evento.preventDefault();
+                const botao = form.querySelector('button');
+                botao.disabled = true;
+                try {
+                    const resposta = await fetch(form.action, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json' },
+                        body: new URLSearchParams(new FormData(form))
+                    });
+                    if (!resposta.ok) throw new Error();
+                    const dados = await resposta.json();
+                    if (dados.ok) {
+                        atualizarBarra(dados);
+                        mostrarAviso(dados.nome + ' adicionado! 🧁');
+                    } else {
+                        mostrarAviso('Ops, esse doce acabou de esgotar 😢');
+                    }
+                } catch (erro) {
+                    mostrarAviso('Não deu certo, tente de novo.');
+                } finally {
+                    botao.disabled = false;
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

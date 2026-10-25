@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     
     <style>
         :root {
@@ -173,11 +173,30 @@
 
         form { margin: 0; }
 
+        .badge {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge.disponivel { background: #dcfce7; color: #15803d; }
+        .badge.esgotado { background: #f1f5f9; color: var(--text-muted); }
+        .badge.tipo { background: #fdf2f8; color: #be185d; }
+        .produto-detalhes .preco { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 0; }
+
+        .topbar-links { display: flex; gap: 16px; align-items: center; }
+
         @media (max-width: 640px) {
-            .page-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+            .topbar { padding: 14px 16px; }
+            .topbar-links { gap: 12px; }
+            .container { margin: 24px auto; padding: 0 16px; }
+            .page-header { flex-direction: column; align-items: stretch; gap: 20px; }
             .btn-primary { width: 100%; justify-content: center; padding: 12px; }
-            .produto-item { flex-direction: column; align-items: stretch; gap: 16px; padding: 20px; }
-            .produto-acoes { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 4px; }
+            .produto-item { flex-direction: column; align-items: stretch; gap: 16px; padding: 16px; }
+            .produto-acoes { display: grid; grid-template-columns: 1fr 1fr 1fr; border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 4px; }
+            .produto-acoes .btn-action { width: 100%; }
             .btn-action { justify-content: center; padding: 10px; }
             form { display: block; width: 100%; }
             .btn-action.delete { width: 100%; border-color: var(--danger-hover); background: var(--danger-bg); }
@@ -191,7 +210,7 @@
             <i class="ph-fill ph-storefront"></i>
             Painel da Chef
         </div>
-        <div style="display: flex; gap: 16px; align-items: center;">
+        <div class="topbar-links">
             <a href="/" class="btn-link"><i class="ph ph-eye"></i> Ver Loja</a>
             <a href="/logout" class="btn-link"><i class="ph ph-sign-out"></i> Sair</a>
         </div>
@@ -227,11 +246,30 @@
                             
                             <div class="produto-detalhes">
                                 <h3><%= produto.nome %></h3>
-                                <p class="preco">R$ <%= produto.preco.toFixed(2).replace('.', ',') %></p>
+                                <p class="preco">
+                                    <%= formatarPreco(produto.preco) %>
+                                    <% if (produto.disponivel) { %>
+                                        <span class="badge disponivel">À venda</span>
+                                    <% } else { %>
+                                        <span class="badge esgotado">Esgotado</span>
+                                    <% } %>
+                                    <span class="badge tipo"><%= produto.tipo === 'encomenda' ? 'Encomenda' : 'Pronta entrega' %></span>
+                                </p>
                             </div>
                         </div>
 
                         <div class="produto-acoes">
+                            <form action="/admin/disponibilidade" method="POST">
+                                <input type="hidden" name="id" value="<%= produto.id %>">
+                                <button type="submit" class="btn-action">
+                                    <% if (produto.disponivel) { %>
+                                        <i class="ph ph-prohibit"></i> Esgotou
+                                    <% } else { %>
+                                        <i class="ph ph-check-circle"></i> Voltou
+                                    <% } %>
+                                </button>
+                            </form>
+
                             <a href="/admin/editar/<%= produto.id %>" class="btn-action">
                                 <i class="ph ph-pencil-simple"></i> Editar
                             </a>

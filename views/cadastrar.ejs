@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
     
     <style>
         :root {
@@ -126,6 +126,37 @@
         }
 
         .btn-cancelar:hover { color: var(--text-main); }
+
+        .tipo-opcoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .tipo-opcoes label {
+            margin: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .tipo-opcoes label:has(input:checked) { border-color: var(--brand-color); background: #fdf2f8; }
+        .tipo-opcoes input { accent-color: var(--brand-color); margin: 0; }
+
+        .erro-msg {
+            background: #fef2f2;
+            color: #ef4444;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 16px; align-items: flex-start; }
+            .form-container { padding: 24px 20px; }
+            input[type="text"], textarea { font-size: 16px; }
+        }
     </style>
 </head>
 <body>
@@ -133,20 +164,32 @@
     <div class="form-container">
         <h2><i class="ph-fill ph-plus-circle" style="color: var(--brand-color);"></i> Cadastrar Doce</h2>
         
+        <% if (erro) { %>
+            <div class="erro-msg"><%= erro %></div>
+        <% } %>
+
         <form action="/admin/salvar" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="nome">Nome do Doce</label>
-                <input type="text" id="nome" name="nome" placeholder="Ex: Bolo de Pote de Morango" required>
+                <input type="text" id="nome" name="nome" value="<%= valores.nome || '' %>" placeholder="Ex: Bolo de Pote de Morango" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="descricao">Descrição (Ingredientes, detalhes)</label>
-                <textarea id="descricao" name="descricao" rows="3" placeholder="Ex: Feito com morangos frescos e leite condensado..." required></textarea>
+                <textarea id="descricao" name="descricao" rows="3" placeholder="Ex: Feito com morangos frescos e leite condensado..." required><%= valores.descricao || '' %></textarea>
             </div>
-            
+
+            <div class="form-group">
+                <label>Em qual aba aparece?</label>
+                <div class="tipo-opcoes">
+                    <label><input type="radio" name="tipo" value="pronta" <%= valores.tipo !== 'encomenda' ? 'checked' : '' %>> Pronta entrega</label>
+                    <label><input type="radio" name="tipo" value="encomenda" <%= valores.tipo === 'encomenda' ? 'checked' : '' %>> Encomenda</label>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="preco">Preço (R$)</label>
-                <input type="text" id="preco" name="preco" placeholder="Ex: 15,50" required pattern="[0-9]+([,\.][0-9]+)?">
+                <input type="text" id="preco" name="preco" value="<%= valores.preco || '' %>" placeholder="Ex: 15,50" inputmode="decimal" required pattern="[0-9]+([,\.][0-9]{1,2})?">
             </div>
 
             <div class="form-group">

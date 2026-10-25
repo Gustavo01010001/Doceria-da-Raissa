@@ -1,171 +1,152 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seu Carrinho</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    <style>
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #f8fafc; 
-            margin: 0; 
-            padding: 0; 
-            color: #0f172a;
-        }
-
-        .header-rosa {
-            background-color: #ffb6c1; 
-            padding: 24px 20px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .header-rosa h1 {
-            margin: 0;
-            font-size: 24px;
-            color: #1e293b;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .carrinho-container {
-            max-width: 600px; 
-            margin: 40px auto; 
-            padding: 0 20px;
-        }
-
-        .lista-itens {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            margin-bottom: 20px;
-        }
-
-        .item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 15px;
-        }
-
-        .item:last-child {
-            border-bottom: none;
-        }
-
-        .total {
-            text-align: right;
-            font-size: 20px;
-            font-weight: 700;
-            color: #dc2626; 
-            margin: 20px 0;
-        }
-
-        /* AQUI ESTÁ A CORREÇÃO MÁGICA: */
-        .btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            width: 100%; 
-            box-sizing: border-box; /* Segura o botão dentro da caixa! */
-            padding: 14px;
-            margin-bottom: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: opacity 0.2s;
-        }
-
-        /* Isso resolve o problema do botão amarelo torto: */
-        form {
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        .btn:hover { opacity: 0.9; }
-
-        .btn-whatsapp { 
-            background-color: #22c55e; 
-            color: white; 
-        }
-
-        .btn-esvaziar { 
-            background-color: #f59e0b; 
-            color: white; 
-        }
-
-        .btn-voltar { 
-            background-color: #e2e8f0; 
-            color: #475569; 
-            margin-top: 24px;
-        }
-        
-        .carrinho-vazio {
-            text-align: center;
-            padding: 40px 20px;
-            color: #64748b;
-        }
-    </style>
+    <%- include('partials/head', { titulo: 'Seu Carrinho - ' + loja.nome }) %>
 </head>
 <body>
+    <%- include('partials/tema') %>
 
-    <div class="header-rosa">
-        <h1><i class="ph-fill ph-shopping-cart"></i> Seu Carrinho</h1>
-    </div>
+    <header class="topo-simples">
+        <div class="container">
+            <a href="/" class="btn-icone" aria-label="Voltar ao cardápio"><i class="ph-bold ph-arrow-left"></i></a>
+            <h1><i class="ph-fill ph-shopping-cart"></i> Seu Carrinho</h1>
+        </div>
+    </header>
 
-    <div class="carrinho-container">
-        
-        <% if (carrinho && carrinho.length > 0) { %>
-            <div class="lista-itens">
-                <% let total = 0; %>
+    <main class="carrinho-container">
+
+        <% if (carrinho.length > 0) { %>
+            <div class="caixa">
                 <% carrinho.forEach(item => { %>
                     <div class="item">
-                        <span><%= item.quantidade %>x <%= item.nome %></span>
-                        <span>R$ <%= (item.preco * item.quantidade).toFixed(2).replace('.', ',') %></span>
+                        <div class="item-foto">
+                            <% if (item.imagem) { %>
+                                <img src="<%= item.imagem %>" alt="<%= item.nome %>">
+                            <% } else { %>
+                                🍰
+                            <% } %>
+                        </div>
+
+                        <div class="item-info">
+                            <strong><%= item.nome %><% if (item.tipo === 'encomenda') { %> <span class="selo-encomenda">Encomenda</span><% } %></strong>
+                            <small><%= formatarPreco(item.preco) %> cada</small>
+                            <form action="/carrinho/quantidade" method="POST" class="quantidade">
+                                <input type="hidden" name="produtoId" value="<%= item.id %>">
+                                <button type="submit" name="acao" value="menos" aria-label="Diminuir"><i class="ph-bold ph-minus"></i></button>
+                                <span class="numero"><%= item.quantidade %></span>
+                                <button type="submit" name="acao" value="mais" aria-label="Aumentar"><i class="ph-bold ph-plus"></i></button>
+                                <button type="submit" name="acao" value="remover" class="remover" aria-label="Remover"><i class="ph ph-trash"></i></button>
+                            </form>
+                        </div>
+
+                        <span class="item-subtotal"><%= formatarPreco(item.preco * item.quantidade) %></span>
                     </div>
-                    <% total += item.preco * item.quantidade; %>
                 <% }) %>
-                
+
                 <div class="total">
-                    Total: R$ <%= total.toFixed(2).replace('.', ',') %>
+                    <span>Total</span>
+                    <span><%= formatarPreco(total) %></span>
                 </div>
             </div>
 
-            <a href="/carrinho/finalizar" class="btn btn-whatsapp">
-                <i class="ph-bold ph-whatsapp-logo"></i> Finalizar Pedido via WhatsApp
+            <form action="/carrinho/finalizar" method="POST" id="form-pedido">
+                <div class="caixa">
+                    <h2><i class="ph-bold ph-user"></i> Seus dados</h2>
+
+                    <% if (erro) { %>
+                        <div class="erro-msg"><i class="ph-bold ph-warning-circle"></i> <%= erro %></div>
+                    <% } %>
+
+                    <div class="campo">
+                        <label for="nome">Seu nome</label>
+                        <input type="text" id="nome" name="nome" value="<%= cliente.nome || '' %>" autocomplete="name" required>
+                    </div>
+
+                    <div class="campo">
+                        <span class="rotulo">Como prefere receber?</span>
+                        <div class="opcoes">
+                            <label>
+                                <input type="radio" name="entrega" value="retirada" <%= cliente.entrega !== 'entrega' ? 'checked' : '' %>>
+                                <span><i class="ph ph-storefront"></i> Retirar</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="entrega" value="entrega" <%= cliente.entrega === 'entrega' ? 'checked' : '' %>>
+                                <span><i class="ph ph-moped"></i> Entrega</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="campo" id="campo-endereco" <%= cliente.entrega === 'entrega' ? '' : 'hidden' %>>
+                        <label for="endereco">Endereço de entrega</label>
+                        <textarea id="endereco" name="endereco" rows="2" placeholder="Rua, número, bairro e complemento" autocomplete="street-address"><%= cliente.endereco || '' %></textarea>
+                        <div class="dica">A taxa de entrega é combinada pelo WhatsApp.</div>
+                    </div>
+
+                    <% if (temEncomenda) { %>
+                        <div class="campo">
+                            <label for="dataEncomenda">Para quando é a encomenda?</label>
+                            <input type="date" id="dataEncomenda" name="dataEncomenda" value="<%= cliente.dataEncomenda || '' %>" min="<%= dataMinima %>" required>
+                            <div class="dica">Encomendas precisam de pelo menos <%= loja.antecedenciaEncomenda %> <%= loja.antecedenciaEncomenda === 1 ? 'dia' : 'dias' %> de antecedência.</div>
+                        </div>
+                    <% } %>
+
+                    <div class="campo">
+                        <span class="rotulo">Forma de pagamento</span>
+                        <div class="opcoes">
+                            <% pagamentos.forEach(pagamento => { %>
+                                <label>
+                                    <input type="radio" name="pagamento" value="<%= pagamento %>" <%= cliente.pagamento === pagamento ? 'checked' : '' %> required>
+                                    <span><%= pagamento %></span>
+                                </label>
+                            <% }) %>
+                        </div>
+                    </div>
+
+                    <div class="campo">
+                        <label for="observacoes">Observações <span style="font-weight: 400; color: var(--cor-texto-suave);">(opcional)</span></label>
+                        <textarea id="observacoes" name="observacoes" rows="2" placeholder="Ex: horário de preferência, sem granulado..."><%= cliente.observacoes || '' %></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-whatsapp">
+                    <i class="ph-bold ph-whatsapp-logo"></i> Enviar pedido pelo WhatsApp
+                </button>
+            </form>
+
+            <a href="/" class="btn btn-secundario">
+                <i class="ph-bold ph-plus"></i> Adicionar mais doces
             </a>
-            
-            <form action="/carrinho/esvaziar" method="POST">
-                <button type="submit" class="btn btn-esvaziar">
-                    <i class="ph-bold ph-trash"></i> Esvaziar Carrinho
+
+            <form action="/carrinho/esvaziar" method="POST" onsubmit="return confirm('Esvaziar o carrinho?');">
+                <button type="submit" class="btn btn-texto">
+                    <i class="ph ph-trash"></i> Esvaziar carrinho
                 </button>
             </form>
 
         <% } else { %>
             <div class="carrinho-vazio">
-                <i class="ph-light ph-shopping-bag" style="font-size: 48px; margin-bottom: 10px;"></i>
+                <i class="ph-light ph-shopping-bag"></i>
                 <p>Seu carrinho está vazio.</p>
             </div>
+
+            <a href="/" class="btn btn-principal">
+                <i class="ph-bold ph-cake"></i> Ver o cardápio
+            </a>
         <% } %>
 
-        <a href="/" class="btn btn-voltar">
-            <i class="ph-bold ph-arrow-left"></i> Voltar ao Cardápio
-        </a>
+    </main>
 
-    </div>
+    <script>
+        // Mostra o campo de endereço só quando escolher "Entrega"
+        const campoEndereco = document.getElementById('campo-endereco');
+        document.querySelectorAll('input[name="entrega"]').forEach(opcao => {
+            opcao.addEventListener('change', () => {
+                const entrega = opcao.value === 'entrega' && opcao.checked;
+                campoEndereco.hidden = !entrega;
+                document.getElementById('endereco').required = entrega;
+            });
+        });
+    </script>
 
 </body>
 </html>

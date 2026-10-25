@@ -1,0 +1,2 @@
+# Scripts do servidor (Linux) precisam de quebra de linha LF, mesmo editando no Windows
+*.sh text eol=lf
