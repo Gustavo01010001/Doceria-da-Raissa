@@ -22,10 +22,17 @@ function formatarData(texto) {
     return `${dia}/${mes}/${ano}`;
 }
 
+// "2026-10-27 22:15:00" (UTC, como o SQLite grava) -> "27/10/2026, 19:15" no horário de Brasília
+function formatarDataHora(texto) {
+    return new Date(texto.replace(' ', 'T') + 'Z').toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short'
+    });
+}
+
 function dataValida(texto) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(texto || '')) return false;
     const data = new Date(texto + 'T00:00:00Z');
     return !isNaN(data) && data.toISOString().slice(0, 10) === texto;
 }
 
-module.exports = { formatarPreco, converterPreco, dataDaquiA, formatarData, dataValida };
+module.exports = { formatarPreco, converterPreco, dataDaquiA, formatarData, formatarDataHora, dataValida };

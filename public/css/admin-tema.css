@@ -73,6 +73,87 @@
 
 input[type="text"], textarea { background-color: var(--card-bg); }
 
+/* Topo e abas das páginas do painel (Cardápio, Pedidos, Vendas) */
+.topbar {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topbar-logo {
+    font-weight: 700;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.topbar-logo i { color: var(--brand-color); font-size: 22px; }
+
+.topbar-links { display: flex; gap: 16px; align-items: center; }
+
+.btn-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+}
+.btn-link:hover { color: var(--text-main); }
+
+.abas-painel {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.abas-painel a {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 14px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s, border-color 0.2s;
+}
+.abas-painel a:hover { color: var(--text-main); }
+.abas-painel a.ativa { color: var(--text-main); border-bottom-color: var(--brand-color); font-weight: 600; }
+
+.contador-pedidos {
+    background: var(--brand-color);
+    color: #ffffff;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    padding: 2px 6px;
+    text-align: center;
+}
+.contador-pedidos[hidden] { display: none; }
+
+@media (max-width: 640px) {
+    .topbar { padding: 14px 16px; }
+    .topbar-links { gap: 12px; }
+    .abas-painel { justify-content: space-around; padding: 0 4px; }
+    .abas-painel a { padding: 12px 8px; }
+}
+
 .btn-tema {
     position: absolute;
     top: calc(12px + env(safe-area-inset-top, 0px));

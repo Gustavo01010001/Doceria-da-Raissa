@@ -100,6 +100,13 @@
                                 </label>
                             <% }) %>
                         </div>
+                        <% if (loja.pix) { %>
+                            <div class="dica" id="dica-pix" <%= cliente.pagamento === 'Pix' ? '' : 'hidden' %>>
+                                Chave Pix: <strong id="chave-pix"><%= loja.pix %></strong>
+                                <button type="button" class="btn-copiar" id="btn-copiar-pix"><i class="ph-bold ph-copy"></i> Copiar</button>
+                                <br>Ela também vai junto na mensagem do pedido.
+                            </div>
+                        <% } %>
                     </div>
 
                     <div class="campo">
@@ -108,9 +115,19 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-whatsapp">
-                    <i class="ph-bold ph-whatsapp-logo"></i> Enviar pedido pelo WhatsApp
-                </button>
+                <% if (pausa.pausada) { %>
+                    <div class="erro-msg">
+                        <i class="ph-bold ph-moon-stars"></i>
+                        Não estamos aceitando pedidos no momento.<%= pausa.recado ? ' ' + pausa.recado : '' %>
+                    </div>
+                    <button type="button" class="btn btn-whatsapp" disabled>
+                        <i class="ph-bold ph-whatsapp-logo"></i> Pedidos pausados
+                    </button>
+                <% } else { %>
+                    <button type="submit" class="btn btn-whatsapp">
+                        <i class="ph-bold ph-whatsapp-logo"></i> Enviar pedido pelo WhatsApp
+                    </button>
+                <% } %>
             </form>
 
             <a href="/" class="btn btn-secundario">
@@ -146,6 +163,35 @@
                 document.getElementById('endereco').required = entrega;
             });
         });
+
+        // Mostra a chave Pix só quando escolher Pix
+        const dicaPix = document.getElementById('dica-pix');
+        if (dicaPix) {
+            document.querySelectorAll('input[name="pagamento"]').forEach(opcao => {
+                opcao.addEventListener('change', () => {
+                    dicaPix.hidden = !(opcao.value === 'Pix' && opcao.checked);
+                });
+            });
+
+            // Copia a chave Pix com um toque
+            const botaoCopiar = document.getElementById('btn-copiar-pix');
+            botaoCopiar.addEventListener('click', async () => {
+                const chave = document.getElementById('chave-pix').textContent.trim();
+                try {
+                    await navigator.clipboard.writeText(chave);
+                } catch (erro) {
+                    // Navegador antigo: copia do jeito antigo
+                    const campo = document.createElement('textarea');
+                    campo.value = chave;
+                    document.body.appendChild(campo);
+                    campo.select();
+                    document.execCommand('copy');
+                    campo.remove();
+                }
+                botaoCopiar.innerHTML = '<i class="ph-bold ph-check"></i> Copiada!';
+                setTimeout(() => { botaoCopiar.innerHTML = '<i class="ph-bold ph-copy"></i> Copiar'; }, 2000);
+            });
+        }
     </script>
 
 </body>

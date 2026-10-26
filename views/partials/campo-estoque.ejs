@@ -1,0 +1,11 @@
+<script>
+    // Estoque só faz sentido para pronta entrega: esconde o campo quando escolher "Encomenda"
+    (function () {
+        const campo = document.getElementById('campo-estoque');
+        document.querySelectorAll('input[name="tipo"]').forEach(opcao => {
+            opcao.addEventListener('change', () => {
+                campo.hidden = opcao.value === 'encomenda' && opcao.checked;
+            });
+        });
+    })();
+</script>

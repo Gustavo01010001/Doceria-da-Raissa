@@ -45,6 +45,7 @@ class LojaController {
 
     fazerLogout(req, res) {
         req.session.logado = false;
+        delete req.session.csrfToken;
         res.redirect('/');
     }
 }

@@ -30,6 +30,16 @@
     ]; %>
 
     <main class="container">
+        <% if (pausa.pausada) { %>
+            <div class="aviso-pausa" role="status">
+                <i class="ph-bold ph-moon-stars"></i>
+                <div>
+                    <strong>Não estamos aceitando pedidos no momento</strong>
+                    <% if (pausa.recado) { %><span><%= pausa.recado %></span><% } %>
+                </div>
+            </div>
+        <% } %>
+
         <nav class="abas" role="tablist">
             <% abas.forEach(aba => { %>
                 <a href="?aba=<%= aba.id %>" class="aba <%= abaAtiva === aba.id ? 'ativa' : '' %>" data-aba="<%= aba.id %>" role="tab" aria-selected="<%= abaAtiva === aba.id %>">
@@ -41,13 +51,23 @@
 
         <% abas.forEach(aba => { %>
         <% const produtosDaAba = produtos.filter(produto => produto.tipo === aba.id); %>
+        <% const categoriasDaAba = [...new Set(produtosDaAba.map(produto => produto.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR')); %>
         <section class="painel-aba" id="aba-<%= aba.id %>" role="tabpanel" <%= abaAtiva === aba.id ? '' : 'hidden' %>>
         <p class="aviso-aba"><i class="ph-bold <%= aba.icone %>"></i> <%= aba.aviso %></p>
+
+        <% if (categoriasDaAba.length > 0) { %>
+            <div class="filtros">
+                <button type="button" class="filtro ativo" data-categoria="" aria-pressed="true">Todos</button>
+                <% categoriasDaAba.forEach(categoria => { %>
+                    <button type="button" class="filtro" data-categoria="<%= categoria %>" aria-pressed="false"><%= categoria %></button>
+                <% }) %>
+            </div>
+        <% } %>
 
         <div class="grid-cardapio">
             <% if (produtosDaAba.length > 0) { %>
                 <% produtosDaAba.forEach(function(produto) { %>
-                    <div class="produto-card <%= produto.disponivel ? '' : 'esgotado' %>">
+                    <div class="produto-card <%= produto.disponivel ? '' : 'esgotado' %>" data-categoria="<%= produto.categoria || '' %>">
 
                         <div class="produto-foto">
                             <% if (produto.imagem) { %>
@@ -66,10 +86,15 @@
                                 <p class="produto-descricao"><%= produto.descricao %></p>
                             <% } %>
                             <p class="produto-preco"><%= formatarPreco(produto.preco) %></p>
+                            <% if (produto.disponivel && produto.estoque !== null) { %>
+                                <p class="produto-restam"><%= produto.estoque === 1 ? 'Resta 1!' : `Restam ${produto.estoque}` %></p>
+                            <% } %>
 
                             <form action="/carrinho/adicionar" method="POST" class="form-comprar">
                                 <input type="hidden" name="produtoId" value="<%= produto.id %>">
-                                <% if (produto.disponivel) { %>
+                                <% if (pausa.pausada && produto.disponivel) { %>
+                                    <button type="button" class="btn-comprar" disabled>Pausado</button>
+                                <% } else if (produto.disponivel) { %>
                                     <button type="submit" class="btn-comprar"><i class="ph-bold ph-plus"></i> <%= aba.id === 'encomenda' ? 'Encomendar' : 'Adicionar' %></button>
                                 <% } else { %>
                                     <button type="button" class="btn-comprar" disabled><%= aba.id === 'encomenda' ? 'Indisponível' : 'Esgotado' %></button>
@@ -139,6 +164,20 @@
             });
         });
 
+        // Filtro por categoria: mostra só os doces da categoria escolhida na aba
+        document.querySelectorAll('.filtro').forEach(filtro => {
+            filtro.addEventListener('click', () => {
+                const painel = filtro.closest('.painel-aba');
+                painel.querySelectorAll('.filtro').forEach(outro => {
+                    outro.classList.toggle('ativo', outro === filtro);
+                    outro.setAttribute('aria-pressed', outro === filtro);
+                });
+                painel.querySelectorAll('.produto-card').forEach(card => {
+                    card.hidden = filtro.dataset.categoria !== '' && card.dataset.categoria !== filtro.dataset.categoria;
+                });
+            });
+        });
+
         // Adiciona ao carrinho sem sair da página
         document.querySelectorAll('.form-comprar').forEach(form => {
             form.addEventListener('submit', async (evento) => {
@@ -156,6 +195,10 @@
                     if (dados.ok) {
                         atualizarBarra(dados);
                         mostrarAviso(dados.nome + ' adicionado! 🧁');
+                    } else if (dados.motivo === 'limite') {
+                        mostrarAviso(`Você já pegou ${dados.estoque === 1 ? 'o último' : 'todos os ' + dados.estoque} 😊`);
+                    } else if (dados.motivo === 'pausada') {
+                        mostrarAviso('A loja não está aceitando pedidos agora.');
                     } else {
                         mostrarAviso('Ops, esse doce acabou de esgotar 😢');
                     }

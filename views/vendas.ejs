@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendas - Doceria</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <link rel="stylesheet" href="/css/admin-tema.css">
+    <%- include('partials/tema-inicial') %>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-title { margin-bottom: 28px; }
+        .page-title h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+        .page-title p { margin: 4px 0 0 0; color: var(--text-muted); font-size: 14px; }
+
+        h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        h2 i { color: var(--brand-color); font-size: 20px; }
+
+        .caixa {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        /* Totais de hoje, 7 dias e mês */
+        .periodos {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+        .periodo-nome { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .periodo-total { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin: 6px 0 4px; font-variant-numeric: tabular-nums; }
+        .periodo-detalhe { font-size: 13px; color: var(--text-muted); }
+
+        /* Mais vendidos */
+        .ranking { list-style: none; margin: 0; padding: 0; }
+        .ranking li { padding: 10px 0; }
+        .ranking li + li { border-top: 1px solid var(--border-color); }
+        .ranking-linha { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; margin-bottom: 6px; }
+        .ranking-linha span:last-child { color: var(--text-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+        .ranking-linha strong { font-weight: 600; }
+        .barra { height: 6px; border-radius: 999px; background: var(--superficie-suave); overflow: hidden; }
+        .barra div { height: 100%; border-radius: 999px; background: var(--brand-color); }
+
+        .nota { font-size: 13px; color: var(--text-muted); margin-top: 16px; }
+
+        .vazio {
+            text-align: center;
+            padding: 32px 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        @media (max-width: 640px) {
+            .container { margin: 24px auto; padding: 0 16px; }
+            .periodos { grid-template-columns: 1fr; gap: 8px; }
+            .periodo-total { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+    <%- include('partials/admin-topo', { ativa: 'vendas' }) %>
+
+    <div class="container">
+
+        <div class="page-title">
+            <h1>Vendas</h1>
+            <p>Quanto entrou e o que mais saiu</p>
+        </div>
+
+        <div class="periodos">
+            <% [['Hoje', hoje], ['Últimos 7 dias', semana], ['Mês de ' + nomeDoMes, mes]].forEach(([nome, periodo]) => { %>
+                <div class="caixa">
+                    <div class="periodo-nome"><%= nome %></div>
+                    <div class="periodo-total"><%= formatarPreco(periodo.total) %></div>
+                    <div class="periodo-detalhe">
+                        <%= periodo.pedidos %> <%= periodo.pedidos === 1 ? 'pedido' : 'pedidos' %>
+                        <% if (periodo.pedidos > 0) { %> · média de <%= formatarPreco(periodo.ticketMedio) %><% } %>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <h2><i class="ph-bold ph-trophy"></i> Mais vendidos em <%= nomeDoMes %></h2>
+        <div class="caixa">
+            <% if (maisVendidos.length > 0) { %>
+                <ol class="ranking">
+                    <% maisVendidos.forEach(item => { %>
+                        <li>
+                            <div class="ranking-linha">
+                                <span><strong><%= item.quantidade %>x</strong> <%= item.nome %></span>
+                                <span><%= formatarPreco(item.total) %></span>
+                            </div>
+                            <div class="barra"><div style="width: <%= Math.round(item.quantidade / maisVendidos[0].quantidade * 100) %>%"></div></div>
+                        </li>
+                    <% }) %>
+                </ol>
+            <% } else { %>
+                <div class="vazio">Nenhuma venda este mês ainda.</div>
+            <% } %>
+        </div>
+
+        <p class="nota">Conta todos os pedidos feitos pelo site, menos os cancelados. Se um cliente desistir de mandar o pedido no WhatsApp, cancele ele na aba Pedidos pra não entrar na conta.</p>
+
+    </div>
+
+</body>
+</html>

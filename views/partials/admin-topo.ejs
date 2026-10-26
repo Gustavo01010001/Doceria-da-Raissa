@@ -1,0 +1,47 @@
+<div class="topbar">
+    <div class="topbar-logo">
+        <i class="ph-fill ph-storefront"></i>
+        Painel da Chef
+    </div>
+    <div class="topbar-links">
+        <%- include('tema', { embutido: true }) %>
+        <a href="/" class="btn-link"><i class="ph ph-eye"></i> Ver Loja</a>
+        <a href="/logout" class="btn-link"><i class="ph ph-sign-out"></i> Sair</a>
+    </div>
+</div>
+
+<nav class="abas-painel">
+    <a href="/admin" class="<%= ativa === 'cardapio' ? 'ativa' : '' %>"><i class="ph ph-cake"></i> Cardápio</a>
+    <a href="/admin/pedidos" class="<%= ativa === 'pedidos' ? 'ativa' : '' %>">
+        <i class="ph ph-receipt"></i> Pedidos
+        <span class="contador-pedidos" id="contador-pedidos" <%= pedidosNovos > 0 ? '' : 'hidden' %>><%= pedidosNovos %></span>
+    </a>
+    <a href="/admin/vendas" class="<%= ativa === 'vendas' ? 'ativa' : '' %>"><i class="ph ph-chart-bar"></i> Vendas</a>
+</nav>
+
+<script>
+    // Confere a cada 30 segundos se chegou pedido novo e atualiza o contador e o título da aba
+    (function () {
+        const contador = document.getElementById('contador-pedidos');
+        const tituloOriginal = document.title;
+
+        function mostrar(novos) {
+            contador.textContent = novos;
+            contador.hidden = novos === 0;
+            document.title = novos > 0 ? `(${novos}) ${tituloOriginal}` : tituloOriginal;
+        }
+
+        async function conferir() {
+            try {
+                const resposta = await fetch('/admin/pedidos/novos', { headers: { 'Accept': 'application/json' } });
+                const dados = await resposta.json();
+                if (typeof dados.novos === 'number') mostrar(dados.novos);
+            } catch (erro) {
+                // Sem internet ou deslogada: tenta de novo na próxima
+            }
+        }
+
+        mostrar(<%= pedidosNovos %>);
+        setInterval(conferir, 30000);
+    })();
+</script>

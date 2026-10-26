@@ -24,40 +24,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .topbar {
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .topbar-logo {
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .topbar-logo i { color: var(--brand-color); font-size: 22px; }
-
-        .btn-link {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: color 0.2s;
-        }
-        .btn-link:hover { color: var(--text-main); }
-
         .container {
             max-width: 800px;
             margin: 40px auto;
@@ -176,11 +142,41 @@
         .badge.tipo { background: var(--rosa-suave); color: var(--rosa-texto); }
         .produto-detalhes .preco { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 0; }
 
-        .topbar-links { display: flex; gap: 16px; align-items: center; }
+        .badge.sem-estoque { background: var(--danger-bg); color: var(--danger-text); }
+
+        /* Cartão de pausar a loja */
+        .pausa {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .pausa.pausada { border-color: var(--danger-text); background: var(--danger-bg); }
+        .pausa-status { display: flex; align-items: center; gap: 12px; }
+        .pausa-status > i { font-size: 28px; color: var(--verde-texto); }
+        .pausa.pausada .pausa-status > i { color: var(--danger-text); }
+        .pausa-status strong { display: block; font-size: 15px; }
+        .pausa-status small { color: var(--text-muted); font-size: 13px; }
+        .pausa form { display: flex; gap: 8px; align-items: center; }
+        .pausa input[type="text"] {
+            padding: 9px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-main);
+            width: 240px;
+        }
 
         @media (max-width: 640px) {
-            .topbar { padding: 14px 16px; }
-            .topbar-links { gap: 12px; }
+            .pausa { flex-direction: column; align-items: stretch; }
+            .pausa form { flex-direction: column; align-items: stretch; }
+            .pausa input[type="text"] { width: 100%; font-size: 16px; }
             .container { margin: 24px auto; padding: 0 16px; }
             .page-header { flex-direction: column; align-items: stretch; gap: 20px; }
             .btn-primary { width: 100%; justify-content: center; padding: 12px; }
@@ -195,20 +191,39 @@
 </head>
 <body>
 
-    <div class="topbar">
-        <div class="topbar-logo">
-            <i class="ph-fill ph-storefront"></i>
-            Painel da Chef
-        </div>
-        <div class="topbar-links">
-            <%- include('partials/tema', { embutido: true }) %>
-            <a href="/" class="btn-link"><i class="ph ph-eye"></i> Ver Loja</a>
-            <a href="/logout" class="btn-link"><i class="ph ph-sign-out"></i> Sair</a>
-        </div>
-    </div>
+    <%- include('partials/admin-topo', { ativa: 'cardapio' }) %>
 
     <div class="container">
-        
+
+        <div class="pausa <%= pausa.pausada ? 'pausada' : '' %>">
+            <div class="pausa-status">
+                <% if (pausa.pausada) { %>
+                    <i class="ph-fill ph-pause-circle"></i>
+                    <div>
+                        <strong>Loja pausada</strong>
+                        <small><%= pausa.recado || 'Os clientes veem o cardápio, mas não conseguem fazer pedidos.' %></small>
+                    </div>
+                <% } else { %>
+                    <i class="ph-fill ph-check-circle"></i>
+                    <div>
+                        <strong>Recebendo pedidos</strong>
+                        <small>A loja está aberta.</small>
+                    </div>
+                <% } %>
+            </div>
+            <form action="/admin/pausa" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <% if (pausa.pausada) { %>
+                    <input type="hidden" name="pausada" value="0">
+                    <button type="submit" class="btn-primary"><i class="ph-bold ph-play"></i> Voltar a receber pedidos</button>
+                <% } else { %>
+                    <input type="hidden" name="pausada" value="1">
+                    <input type="text" name="recado" maxlength="200" placeholder="Recado (opcional): Voltamos segunda!">
+                    <button type="submit" class="btn-primary"><i class="ph-bold ph-pause"></i> Pausar pedidos</button>
+                <% } %>
+            </form>
+        </div>
+
         <div class="page-header">
             <div class="page-title">
                 <h1>Gerenciar Cardápio</h1>
@@ -245,12 +260,19 @@
                                         <span class="badge esgotado">Esgotado</span>
                                     <% } %>
                                     <span class="badge tipo"><%= produto.tipo === 'encomenda' ? 'Encomenda' : 'Pronta entrega' %></span>
+                                    <% if (produto.tipo !== 'encomenda' && produto.estoque !== null) { %>
+                                        <span class="badge <%= produto.estoque > 0 ? 'esgotado' : 'sem-estoque' %>"><%= produto.estoque > 0 ? 'Estoque: ' + produto.estoque : 'Sem estoque' %></span>
+                                    <% } %>
+                                    <% if (produto.categoria) { %>
+                                        <span class="badge esgotado"><%= produto.categoria %></span>
+                                    <% } %>
                                 </p>
                             </div>
                         </div>
 
                         <div class="produto-acoes">
                             <form action="/admin/disponibilidade" method="POST">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <input type="hidden" name="id" value="<%= produto.id %>">
                                 <button type="submit" class="btn-action">
                                     <% if (produto.disponivel) { %>
@@ -266,6 +288,7 @@
                             </a>
                             
                             <form action="/admin/excluir" method="POST" onsubmit="return confirm('Tem certeza que deseja apagar este produto do cardápio?');">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <input type="hidden" name="id" value="<%= produto.id %>">
                                 <button type="submit" class="btn-action delete">
                                     <i class="ph ph-trash"></i> Excluir

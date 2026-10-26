@@ -2,3 +2,5 @@ node_modules/
 *.sqlite
 .env
 backups/
+# Fotos enviadas pela chef (ficam só no servidor e entram no backup.sh)
+public/uploads/*

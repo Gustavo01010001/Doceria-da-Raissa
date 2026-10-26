@@ -163,6 +163,8 @@
         <% } %>
 
         <form action="/admin/salvar" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
             <div class="form-group">
                 <label for="nome">Nome do Doce</label>
                 <input type="text" id="nome" name="nome" value="<%= valores.nome || '' %>" placeholder="Ex: Bolo de Pote de Morango" required>
@@ -182,8 +184,21 @@
             </div>
 
             <div class="form-group">
+                <label for="categoria">Categoria <span class="opcional">(Opcional, ex: Bolos, Doces, Salgados)</span></label>
+                <input type="text" id="categoria" name="categoria" value="<%= valores.categoria || '' %>" list="lista-categorias" maxlength="40" autocomplete="off">
+                <datalist id="lista-categorias">
+                    <% categorias.forEach(categoria => { %><option value="<%= categoria %>"><% }) %>
+                </datalist>
+            </div>
+
+            <div class="form-group">
                 <label for="preco">Preço (R$)</label>
                 <input type="text" id="preco" name="preco" value="<%= valores.preco || '' %>" placeholder="Ex: 15,50" inputmode="decimal" required pattern="[0-9]+([,\.][0-9]{1,2})?">
+            </div>
+
+            <div class="form-group" id="campo-estoque" <%= valores.tipo === 'encomenda' ? 'hidden' : '' %>>
+                <label for="estoque">Quantidade disponível <span class="opcional">(Opcional. Esgota sozinho quando acabar.)</span></label>
+                <input type="text" id="estoque" name="estoque" value="<%= valores.estoque || '' %>" placeholder="Ex: 10 (vazio = sem limite)" inputmode="numeric" pattern="[0-9]*">
             </div>
 
             <div class="form-group">
@@ -195,6 +210,8 @@
             <a href="/admin" class="btn-cancelar"><i class="ph-bold ph-arrow-left"></i> Voltar para o Painel</a>
         </form>
     </div>
+
+    <%- include('partials/campo-estoque') %>
 
 </body>
 </html>

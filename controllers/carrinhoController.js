@@ -1,4 +1,5 @@
 const Produto = require('../models/produtoModel');
+const Pedido = require('../models/pedidoModel');
 const loja = require('../config/loja');
 const { formatarPreco, dataDaquiA, formatarData, dataValida } = require('../utils/formatar');
 
@@ -35,17 +36,42 @@ function resumoDoCarrinho(carrinho) {
     };
 }
 
-// Atualiza preço/nome com o que está no banco e tira do carrinho o que foi apagado ou esgotou
+// Atualiza preço/nome com o que está no banco, tira do carrinho o que foi apagado ou esgotou
+// e diminui a quantidade quando passou do estoque. "ajustados" diz o que foi diminuído.
 async function sincronizarCarrinho(req) {
-    const atualizado = [];
+    const carrinho = [];
+    const ajustados = [];
     for (const item of req.session.carrinho || []) {
         const produto = await Produto.buscarPorId(item.id);
         if (produto && produto.disponivel) {
-            atualizado.push(itemDoCarrinho(produto, item.quantidade));
+            let quantidade = item.quantidade;
+            if (produto.estoque !== null && quantidade > produto.estoque) {
+                quantidade = produto.estoque;
+                ajustados.push(`${produto.nome} (só ${produto.estoque === 1 ? 'resta 1' : 'restam ' + produto.estoque})`);
+            }
+            carrinho.push(itemDoCarrinho(produto, quantidade));
         }
     }
-    req.session.carrinho = atualizado;
-    return atualizado;
+    req.session.carrinho = carrinho;
+    return { carrinho, ajustados };
+}
+
+function avisoDeAjuste(ajustados) {
+    return ajustados.length > 0 ? `Ajustamos a quantidade de: ${ajustados.join(', ')}.` : null;
+}
+
+// Tira do estoque os itens de pronta entrega. Se algum não tiver mais o suficiente
+// (outro cliente comprou antes), devolve o que já tinha tirado e retorna o nome dele.
+async function reservarEstoque(itens) {
+    const reservados = [];
+    for (const item of itens.filter(item => item.tipo !== 'encomenda')) {
+        if (!(await Produto.baixarEstoque(item.id, item.quantidade))) {
+            for (const reservado of reservados) await Produto.devolverEstoque(reservado.id, reservado.quantidade);
+            return item.nome;
+        }
+        reservados.push(item);
+    }
+    return null;
 }
 
 class CarrinhoController {
@@ -62,11 +88,16 @@ class CarrinhoController {
         const querJson = (req.get('Accept') || '').includes('application/json');
         try {
             const produto = await Produto.buscarPorId(produtoId);
+            const item = (req.session.carrinho || []).find(item => item.id === produtoId);
 
-            if (produto && produto.disponivel) {
+            // Por que não deu pra adicionar (null = deu certo)
+            let motivo = null;
+            if (res.locals.pausa.pausada) motivo = 'pausada';
+            else if (!produto || !produto.disponivel) motivo = 'esgotado';
+            else if (produto.estoque !== null && item && item.quantidade >= produto.estoque) motivo = 'limite';
+
+            if (!motivo) {
                 if (!req.session.carrinho) req.session.carrinho = [];
-
-                const item = req.session.carrinho.find(item => item.id === produtoId);
                 if (item) {
                     item.quantidade += 1;
                 } else {
@@ -77,8 +108,10 @@ class CarrinhoController {
             // A vitrine adiciona sem recarregar a página
             if (querJson) {
                 return res.json({
-                    ok: Boolean(produto && produto.disponivel),
+                    ok: !motivo,
+                    motivo,
                     nome: produto ? produto.nome : null,
+                    estoque: produto ? produto.estoque : null,
                     ...resumoDoCarrinho(req.session.carrinho || [])
                 });
             }
@@ -91,8 +124,8 @@ class CarrinhoController {
 
     async exibirCarrinho(req, res) {
         try {
-            const carrinho = await sincronizarCarrinho(req);
-            renderizarCarrinho(res, carrinho);
+            const { carrinho, ajustados } = await sincronizarCarrinho(req);
+            renderizarCarrinho(res, carrinho, avisoDeAjuste(ajustados));
         } catch (error) {
             console.error(error);
             res.status(500).send("Erro ao carregar o carrinho");
@@ -121,9 +154,9 @@ class CarrinhoController {
 
     async finalizarPedido(req, res) {
         try {
-            const carrinho = await sincronizarCarrinho(req);
+            const { carrinho, ajustados } = await sincronizarCarrinho(req);
 
-            if (carrinho.length === 0) {
+            if (carrinho.length === 0 || res.locals.pausa.pausada) {
                 return res.redirect('/carrinho');
             }
 
@@ -146,6 +179,13 @@ class CarrinhoController {
             else if (encomendas.length > 0 && !dataValida(cliente.dataEncomenda)) erro = 'Escolha a data da encomenda.';
             else if (encomendas.length > 0 && cliente.dataEncomenda < dataMinima) erro = `A encomenda precisa ser para ${formatarData(dataMinima)} ou depois.`;
             else if (!cliente.pagamento) erro = 'Escolha a forma de pagamento.';
+            // O estoque mudou enquanto o cliente preenchia: mostra o carrinho ajustado antes de enviar
+            else if (ajustados.length > 0) erro = avisoDeAjuste(ajustados);
+
+            if (!erro) {
+                const esgotou = await reservarEstoque(carrinho);
+                if (esgotou) erro = `Ops, ${esgotou} acabou de esgotar. Confira o carrinho e tente de novo.`;
+            }
 
             if (erro) {
                 res.status(400);
@@ -163,13 +203,25 @@ class CarrinhoController {
             if (encomendas.length > 0) {
                 texto += `*Encomenda para ${formatarData(cliente.dataEncomenda)}:*\n${listarItens(encomendas)}\n`;
             }
-            texto += `*Total: ${formatarPreco(resumoDoCarrinho(carrinho).total)}*\n\n`;
+            const total = resumoDoCarrinho(carrinho).total;
+            texto += `*Total: ${formatarPreco(total)}*\n\n`;
             texto += `*Nome:* ${cliente.nome}\n`;
             texto += cliente.entrega === 'entrega'
                 ? `*Entrega no endereço:* ${cliente.endereco}\n`
                 : `*Vou retirar no local*\n`;
             texto += `*Pagamento:* ${cliente.pagamento}\n`;
             if (cliente.observacoes) texto += `*Observações:* ${cliente.observacoes}\n`;
+            if (cliente.pagamento === 'Pix' && loja.pix) texto += `\n*Chave Pix da loja:* ${loja.pix}\n`;
+
+            // Guarda uma cópia no painel da chef (aba Pedidos)
+            await Pedido.incluir({
+                ...cliente,
+                endereco: cliente.entrega === 'entrega' ? cliente.endereco : null,
+                dataEncomenda: encomendas.length > 0 ? cliente.dataEncomenda : null,
+                // O id serve pra devolver ao estoque se o pedido for cancelado
+                itens: carrinho.map(item => ({ id: item.id, nome: item.nome, preco: item.preco, quantidade: item.quantidade, tipo: item.tipo })),
+                total
+            });
 
             req.session.carrinho = [];
 

@@ -10,7 +10,9 @@ try {
 const express = require('express');
 const session = require('express-session');
 const loja = require('./config/loja');
-const { formatarPreco } = require('./utils/formatar');
+const SessaoStore = require('./config/sessaoStore');
+const Configuracao = require('./models/configuracaoModel');
+const { formatarPreco, formatarData, formatarDataHora } = require('./utils/formatar');
 
 // Online, não deixa o site subir com a senha padrão que está no GitHub
 if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_SENHA || !process.env.SESSION_SECRET)) {
@@ -31,6 +33,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(session({
+    store: new SessaoStore(),
     secret: loja.sessionSecret,
     resave: false,
     saveUninitialized: false,
@@ -44,7 +47,17 @@ app.use(session({
 // Disponível em todas as views
 app.locals.loja = loja;
 app.locals.formatarPreco = formatarPreco;
-app.use((req, res, next) => {
+app.locals.formatarData = formatarData;
+app.locals.formatarDataHora = formatarDataHora;
+app.use(async (req, res, next) => {
+    // Loja pausada pela chef: a vitrine e o carrinho param de aceitar pedidos
+    try {
+        res.locals.pausa = await Configuracao.buscarPausa();
+    } catch (erro) {
+        console.error(erro);
+        res.locals.pausa = { pausada: false, recado: '' };
+    }
+
     const carrinho = req.session.carrinho || [];
     res.locals.quantidadeCarrinho = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
     res.locals.totalCarrinho = carrinho.reduce((soma, item) => soma + (item.preco * item.quantidade), 0);

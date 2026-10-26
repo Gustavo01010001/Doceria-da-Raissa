@@ -7,6 +7,8 @@ module.exports = {
     whatsapp: process.env.LOJA_WHATSAPP || '5518996469830',
     // Só o @ sem o arroba (ex: doceriadachef). Deixe vazio pra esconder o botão.
     instagram: process.env.LOJA_INSTAGRAM || '',
+    // Chave Pix (CPF, celular, e-mail ou aleatória). Aparece quando o cliente escolhe Pix. Vazio = não mostra.
+    pix: process.env.LOJA_PIX || '18996469830',
     // Quantos dias de antecedência a chef precisa para fazer uma encomenda
     antecedenciaEncomenda: parseInt(process.env.LOJA_ANTECEDENCIA_ENCOMENDA || '2'),
 

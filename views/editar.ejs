@@ -189,6 +189,7 @@
         <% } %>
 
         <form action="/admin/atualizar" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <input type="hidden" name="id" value="<%= produto.id %>">
 
             <div class="form-group">
@@ -210,8 +211,21 @@
             </div>
 
             <div class="form-group">
+                <label for="categoria">Categoria <span class="opcional">(Opcional, ex: Bolos, Doces, Salgados)</span></label>
+                <input type="text" id="categoria" name="categoria" value="<%= produto.categoria || '' %>" list="lista-categorias" maxlength="40" autocomplete="off">
+                <datalist id="lista-categorias">
+                    <% categorias.forEach(categoria => { %><option value="<%= categoria %>"><% }) %>
+                </datalist>
+            </div>
+
+            <div class="form-group">
                 <label for="preco">Preço (R$)</label>
                 <input type="text" id="preco" name="preco" value="<%= produto.preco.toFixed(2).replace('.', ',') %>" inputmode="decimal" required pattern="[0-9]+([,\.][0-9]{1,2})?">
+            </div>
+
+            <div class="form-group" id="campo-estoque" <%= produto.tipo === 'encomenda' ? 'hidden' : '' %>>
+                <label for="estoque">Quantidade disponível <span class="opcional">(Opcional. Esgota sozinho quando acabar.)</span></label>
+                <input type="text" id="estoque" name="estoque" value="<%= produto.estoque ?? '' %>" placeholder="Ex: 10 (vazio = sem limite)" inputmode="numeric" pattern="[0-9]*">
             </div>
 
             <div class="form-group">
@@ -232,6 +246,8 @@
             <a href="/admin" class="btn-cancelar"><i class="ph-bold ph-arrow-left"></i> Voltar para o Painel</a>
         </form>
     </div>
+
+    <%- include('partials/campo-estoque') %>
 
 </body>
 </html>
