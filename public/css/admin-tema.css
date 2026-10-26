@@ -1,0 +1,102 @@
+/* Cores do painel da chef (claro e escuro) */
+
+:root {
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --brand-color: #ec4899;
+    --danger-bg: #fef2f2;
+    --danger-text: #ef4444;
+    --danger-hover: #fee2e2;
+    --superficie-suave: #f1f5f9;
+    --borda-forte: #cbd5e1;
+    --icone-suave: #94a3b8;
+    --btn-bg: #0f172a;
+    --btn-bg-hover: #334155;
+    --btn-texto: #ffffff;
+    --rosa-suave: #fdf2f8;
+    --rosa-texto: #be185d;
+    --verde-bg: #dcfce7;
+    --verde-texto: #15803d;
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-tema="claro"]) {
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+        --border-color: #334155;
+        --brand-color: #f472b6;
+        --danger-bg: #3b1d24;
+        --danger-text: #f87171;
+        --danger-hover: #4c1d26;
+        --superficie-suave: #172033;
+        --borda-forte: #475569;
+        --icone-suave: #64748b;
+        --btn-bg: #f1f5f9;
+        --btn-bg-hover: #cbd5e1;
+        --btn-texto: #0f172a;
+        --rosa-suave: #3b1f33;
+        --rosa-texto: #f9a8d4;
+        --verde-bg: #14361f;
+        --verde-texto: #86efac;
+        color-scheme: dark;
+    }
+}
+
+:root[data-tema="escuro"] {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --brand-color: #f472b6;
+    --danger-bg: #3b1d24;
+    --danger-text: #f87171;
+    --danger-hover: #4c1d26;
+    --superficie-suave: #172033;
+    --borda-forte: #475569;
+    --icone-suave: #64748b;
+    --btn-bg: #f1f5f9;
+    --btn-bg-hover: #cbd5e1;
+    --btn-texto: #0f172a;
+    --rosa-suave: #3b1f33;
+    --rosa-texto: #f9a8d4;
+    --verde-bg: #14361f;
+    --verde-texto: #86efac;
+    color-scheme: dark;
+}
+
+input[type="text"], textarea { background-color: var(--card-bg); }
+
+.btn-tema {
+    position: absolute;
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-main);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 25;
+}
+
+.btn-tema:hover { background: var(--superficie-suave); }
+
+/* Versão dentro da barra do topo do painel */
+.btn-tema.embutido { position: static; flex-shrink: 0; }
+
+/* No celular, abre espaço para o botão não ficar em cima do formulário */
+@media (max-width: 640px) {
+    body:has(> .btn-tema:not(.embutido)) { padding-top: 60px; }
+}

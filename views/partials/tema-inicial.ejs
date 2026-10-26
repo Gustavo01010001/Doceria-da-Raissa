@@ -1,0 +1,7 @@
+<script>
+    // Aplica o tema escolhido antes de desenhar a página (evita piscar branco no modo escuro)
+    try {
+        const tema = localStorage.getItem('tema');
+        if (tema === 'claro' || tema === 'escuro') document.documentElement.dataset.tema = tema;
+    } catch (erro) {}
+</script>

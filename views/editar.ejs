@@ -9,17 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+    <link rel="stylesheet" href="/css/admin-tema.css">
+    <%- include('partials/tema-inicial') %>
 
     <style>
-        :root {
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --brand-color: #ec4899;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
@@ -88,8 +81,8 @@
 
         input[type="file"] {
             padding: 10px;
-            border: 1px dashed #cbd5e1;
-            background: #f8fafc;
+            border: 1px dashed var(--borda-forte);
+            background: var(--superficie-suave);
             cursor: pointer;
             color: var(--text-muted);
         }
@@ -110,19 +103,19 @@
             border-radius: 8px;
             object-fit: cover;
             border: 1px solid var(--border-color);
-            background: #f1f5f9;
+            background: var(--superficie-suave);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            color: #94a3b8;
+            color: var(--icone-suave);
         }
 
         .btn-salvar {
             width: 100%;
             padding: 12px;
-            background-color: var(--text-main);
-            color: white;
+            background-color: var(--btn-bg);
+            color: var(--btn-texto);
             border: none;
             border-radius: 8px;
             font-weight: 500;
@@ -136,7 +129,7 @@
             margin-top: 10px;
         }
 
-        .btn-salvar:hover { background-color: #334155; }
+        .btn-salvar:hover { background-color: var(--btn-bg-hover); }
 
         .btn-cancelar {
             display: flex;
@@ -165,12 +158,12 @@
             gap: 8px;
             font-size: 14px;
         }
-        .tipo-opcoes label:has(input:checked) { border-color: var(--brand-color); background: #fdf2f8; }
+        .tipo-opcoes label:has(input:checked) { border-color: var(--brand-color); background: var(--rosa-suave); }
         .tipo-opcoes input { accent-color: var(--brand-color); margin: 0; }
 
         .erro-msg {
-            background: #fef2f2;
-            color: #ef4444;
+            background: var(--danger-bg);
+            color: var(--danger-text);
             border-radius: 8px;
             padding: 12px;
             font-size: 14px;
@@ -186,6 +179,7 @@
     </style>
 </head>
 <body>
+    <%- include('partials/tema') %>
 
     <div class="form-container">
         <h2><i class="ph-fill ph-pencil-simple" style="color: var(--brand-color);"></i> Editar Doce</h2>
