@@ -4,11 +4,11 @@
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --text-main: #0f172a;
-    --text-muted: #64748b;
+    --text-muted: #55637a;
     --border-color: #e2e8f0;
     --brand-color: #ec4899;
     --danger-bg: #fef2f2;
-    --danger-text: #ef4444;
+    --danger-text: #b91c1c;
     --danger-hover: #fee2e2;
     --superficie-suave: #f1f5f9;
     --borda-forte: #cbd5e1;
@@ -162,7 +162,7 @@ input[type="text"], textarea { background-color: var(--card-bg); }
 .abas-painel a.ativa { color: var(--text-main); border-bottom-color: var(--brand-color); font-weight: 600; }
 
 .contador-pedidos {
-    background: var(--brand-color);
+    background: #be185d;
     color: #ffffff;
     border-radius: 999px;
     font-size: 11px;

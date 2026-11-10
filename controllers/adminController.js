@@ -70,7 +70,8 @@ class AdminController {
     }
 
     async incluir(req, res) {
-        const { nome, descricao } = req.body;
+        const { descricao } = req.body;
+        const nome = typeof req.body.nome === 'string' ? req.body.nome : '';
         const preco = converterPreco(req.body.preco);
         const tipo = converterTipo(req.body.tipo);
         const estoque = converterEstoque(req.body.estoque, tipo);
@@ -107,7 +108,8 @@ class AdminController {
     }
 
     async alterar(req, res) {
-        const { id, nome, descricao } = req.body;
+        const { id, descricao } = req.body;
+        const nome = typeof req.body.nome === 'string' ? req.body.nome : '';
         const preco = converterPreco(req.body.preco);
         const tipo = converterTipo(req.body.tipo);
         const estoque = converterEstoque(req.body.estoque, tipo);

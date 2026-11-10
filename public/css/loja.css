@@ -10,7 +10,7 @@
     --cor-texto: #3a2a2f;
     --cor-texto-suave: #7a6a70;
     --cor-borda: #f1e4e8;
-    --cor-whatsapp: #22c55e;
+    --cor-whatsapp: #15803d;
     --cor-superficie: #ffffff;
     --cor-chip: rgba(255, 255, 255, 0.85);
     --cor-campo-borda: #e6d6dc;
@@ -258,7 +258,7 @@ button, input, textarea, select { font-family: inherit; }
     text-align: center;
 }
 
-.aba.ativa .aba-contador { background: rgba(255, 255, 255, 0.25); color: white; }
+.aba.ativa .aba-contador { background: rgba(0, 0, 0, 0.22); color: white; }
 
 .painel-aba[hidden] { display: none; }
 
@@ -738,6 +738,11 @@ form { margin: 0; }
 .campo textarea { resize: vertical; }
 
 .campo .dica { color: var(--cor-texto-suave); font-size: 12px; margin-top: 4px; }
+
+/* Aviso de erro logo abaixo do campo (ex: data da encomenda que já passou) */
+.campo .erro-campo { color: var(--cor-erro-texto); font-size: 13px; font-weight: 700; margin-top: 6px; }
+.campo .erro-campo[hidden] { display: none; }
+.campo input.invalido { border-color: var(--cor-erro-texto); }
 
 .opcoes {
     display: grid;

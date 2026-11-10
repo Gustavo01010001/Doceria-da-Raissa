@@ -6,9 +6,17 @@ const { criarLimitador } = require('../utils/limitador');
 
 const PAGAMENTOS = ['Pix', 'Dinheiro', 'Cartão'];
 
+// Até quantos dias à frente dá pra marcar uma encomenda (evita data digitada errada, tipo ano 9999)
+const PRAZO_MAXIMO_ENCOMENDA = 365;
+
 // No máximo 5 pedidos a cada 30 minutos por IP: um robô não consegue reservar o estoque todo
 // mandando pedido atrás de pedido (cliente de verdade não chega perto disso)
 const pedidosRecentes = criarLimitador({ maximo: 5, janela: 30 * 60 * 1000 });
+
+// Pedidos que estão sendo finalizados agora, por sessão. Se o cliente tocar duas vezes em
+// "Enviar pedido", o segundo toque espera o primeiro e vai para o mesmo link do WhatsApp.
+const finalizando = new Map();
+const TEMPO_DO_ULTIMO_PEDIDO = 15 * 1000;
 
 function itemDoCarrinho(produto, quantidade) {
     return {
@@ -36,7 +44,9 @@ function renderizarCarrinho(res, carrinho, erro = null, cliente = {}) {
         cliente,
         pagamentos: PAGAMENTOS,
         temEncomenda: carrinho.some(item => item.tipo === 'encomenda'),
-        dataMinima: dataDaquiA(loja.antecedenciaEncomenda)
+        hoje: dataDaquiA(0),
+        dataMinima: dataDaquiA(loja.antecedenciaEncomenda),
+        dataMaxima: dataDaquiA(PRAZO_MAXIMO_ENCOMENDA)
     });
 }
 
@@ -159,8 +169,22 @@ class CarrinhoController {
     }
 
     async finalizarPedido(req, res) {
+        const emAndamento = finalizando.get(req.sessionID);
+        if (emAndamento) {
+            return res.redirect((await emAndamento) || '/carrinho');
+        }
+
+        let avisarQuemEspera;
+        finalizando.set(req.sessionID, new Promise(resolver => { avisarQuemEspera = resolver; }));
+        let linkDoPedido = null;
+
         try {
             const { carrinho, ajustados } = await sincronizarCarrinho(req);
+
+            // Tocou de novo logo depois de enviar: o carrinho já esvaziou, então repete o mesmo link
+            const ultimo = req.session.ultimoPedido;
+            if (ultimo && Date.now() - ultimo.em > TEMPO_DO_ULTIMO_PEDIDO) delete req.session.ultimoPedido;
+            else if (ultimo && carrinho.length === 0) return res.redirect(ultimo.url);
 
             if (carrinho.length === 0 || res.locals.pausa.pausada) {
                 return res.redirect('/carrinho');
@@ -184,7 +208,9 @@ class CarrinhoController {
             else if (!cliente.nome) erro = 'Informe seu nome.';
             else if (cliente.entrega === 'entrega' && !cliente.endereco) erro = 'Informe o endereço de entrega.';
             else if (encomendas.length > 0 && !dataValida(cliente.dataEncomenda)) erro = 'Escolha a data da encomenda.';
+            else if (encomendas.length > 0 && cliente.dataEncomenda < dataDaquiA(0)) erro = `O dia escolhido para a encomenda já passou. Escolha uma data a partir de ${formatarData(dataMinima)}.`;
             else if (encomendas.length > 0 && cliente.dataEncomenda < dataMinima) erro = `A encomenda precisa ser para ${formatarData(dataMinima)} ou depois.`;
+            else if (encomendas.length > 0 && cliente.dataEncomenda > dataDaquiA(PRAZO_MAXIMO_ENCOMENDA)) erro = 'A encomenda pode ser marcada para até 1 ano à frente.';
             else if (!cliente.pagamento) erro = 'Escolha a forma de pagamento.';
             // O estoque mudou enquanto o cliente preenchia: mostra o carrinho ajustado antes de enviar
             else if (ajustados.length > 0) erro = avisoDeAjuste(ajustados);
@@ -234,10 +260,15 @@ class CarrinhoController {
             req.session.carrinho = [];
 
             const url = `https://wa.me/${loja.whatsapp}?text=${encodeURIComponent(texto)}`;
+            linkDoPedido = url;
+            req.session.ultimoPedido = { url, em: Date.now() };
             res.redirect(url);
         } catch (error) {
             console.error(error);
             res.status(500).send("Erro ao finalizar o pedido");
+        } finally {
+            finalizando.delete(req.sessionID);
+            avisarQuemEspera(linkDoPedido);
         }
     }
 }

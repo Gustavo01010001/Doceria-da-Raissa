@@ -64,8 +64,8 @@
                     </div>
 
                     <div class="campo">
-                        <span class="rotulo">Como prefere receber?</span>
-                        <div class="opcoes">
+                        <span class="rotulo" id="rotulo-entrega">Como prefere receber?</span>
+                        <div class="opcoes" role="radiogroup" aria-labelledby="rotulo-entrega">
                             <label>
                                 <input type="radio" name="entrega" value="retirada" <%= cliente.entrega !== 'entrega' ? 'checked' : '' %>>
                                 <span><i class="ph ph-storefront"></i> Retirar</span>
@@ -86,14 +86,15 @@
                     <% if (temEncomenda) { %>
                         <div class="campo">
                             <label for="dataEncomenda">Para quando é a encomenda?</label>
-                            <input type="date" id="dataEncomenda" name="dataEncomenda" value="<%= cliente.dataEncomenda || '' %>" min="<%= dataMinima %>" required>
-                            <div class="dica">Encomendas precisam de pelo menos <%= loja.antecedenciaEncomenda %> <%= loja.antecedenciaEncomenda === 1 ? 'dia' : 'dias' %> de antecedência.</div>
+                            <input type="date" id="dataEncomenda" name="dataEncomenda" value="<%= cliente.dataEncomenda || '' %>" min="<%= dataMinima %>" max="<%= dataMaxima %>" data-hoje="<%= hoje %>" aria-describedby="erro-data dica-data" required>
+                            <div class="erro-campo" id="erro-data" role="alert" hidden></div>
+                            <div class="dica" id="dica-data">Encomendas precisam de pelo menos <%= loja.antecedenciaEncomenda %> <%= loja.antecedenciaEncomenda === 1 ? 'dia' : 'dias' %> de antecedência.</div>
                         </div>
                     <% } %>
 
                     <div class="campo">
-                        <span class="rotulo">Forma de pagamento</span>
-                        <div class="opcoes">
+                        <span class="rotulo" id="rotulo-pagamento">Forma de pagamento</span>
+                        <div class="opcoes" role="radiogroup" aria-labelledby="rotulo-pagamento">
                             <% pagamentos.forEach(pagamento => { %>
                                 <label>
                                     <input type="radio" name="pagamento" value="<%= pagamento %>" <%= cliente.pagamento === pagamento ? 'checked' : '' %> required>
@@ -155,6 +156,52 @@
     </main>
 
     <script>
+        // Depois do primeiro toque em "Enviar pedido", trava o botão pra não enviar duas vezes.
+        // Ao voltar do WhatsApp para esta página, o botão destrava.
+        const formPedido = document.getElementById('form-pedido');
+        if (formPedido) {
+            const botaoEnviar = formPedido.querySelector('button[type="submit"]');
+            if (botaoEnviar) {
+                formPedido.addEventListener('submit', () => { botaoEnviar.disabled = true; });
+                window.addEventListener('pageshow', () => { botaoEnviar.disabled = false; });
+            }
+        }
+
+        // Data da encomenda: avisa na hora se o dia já passou, está perto demais ou longe demais
+        const campoData = document.getElementById('dataEncomenda');
+        if (campoData) {
+            const erroData = document.getElementById('erro-data');
+            const formatar = data => data.split('-').reverse().join('/');
+
+            function problemaNaData() {
+                const data = campoData.value;
+                if (!data) return '';
+                if (data < campoData.dataset.hoje) return `Esse dia já passou. Escolha uma data a partir de ${formatar(campoData.min)}.`;
+                if (data < campoData.min) return `Essa data está muito em cima da hora. A primeira data disponível é ${formatar(campoData.min)}.`;
+                if (data > campoData.max) return `Essa data está muito longe. Escolha uma data até ${formatar(campoData.max)}.`;
+                return '';
+            }
+
+            function mostrarProblema() {
+                const problema = problemaNaData();
+                campoData.setCustomValidity(problema);
+                erroData.textContent = problema;
+                erroData.hidden = !problema;
+                campoData.classList.toggle('invalido', Boolean(problema));
+            }
+
+            // Enquanto digita o ano o navegador passa por datas incompletas (ex: ano 0002),
+            // então o aviso espera o ano ficar completo (ou a pessoa sair do campo)
+            campoData.addEventListener('input', () => {
+                campoData.setCustomValidity(problemaNaData());
+                const anoCompleto = campoData.value.slice(0, 4) >= '1000';
+                if (anoCompleto || !erroData.hidden) mostrarProblema();
+            });
+            campoData.addEventListener('blur', mostrarProblema);
+            campoData.addEventListener('invalid', mostrarProblema);
+            if (campoData.value) mostrarProblema();
+        }
+
         // Mostra o campo de endereço só quando escolher "Entrega"
         const campoEndereco = document.getElementById('campo-endereco');
         document.querySelectorAll('input[name="entrega"]').forEach(opcao => {
