@@ -42,7 +42,7 @@
 
         <nav class="abas" role="tablist">
             <% abas.forEach(aba => { %>
-                <a href="?aba=<%= aba.id %>" class="aba <%= abaAtiva === aba.id ? 'ativa' : '' %>" data-aba="<%= aba.id %>" role="tab" aria-selected="<%= abaAtiva === aba.id %>">
+                <a href="?aba=<%= aba.id %>" class="aba <%= abaAtiva === aba.id ? 'ativa' : '' %>" data-aba="<%= aba.id %>" role="tab" id="tab-<%= aba.id %>" aria-controls="aba-<%= aba.id %>" aria-selected="<%= abaAtiva === aba.id %>" tabindex="<%= abaAtiva === aba.id ? 0 : -1 %>">
                     <i class="ph-bold <%= aba.icone %>"></i> <%= aba.titulo %>
                     <span class="aba-contador"><%= produtos.filter(produto => produto.tipo === aba.id).length %></span>
                 </a>
@@ -52,7 +52,7 @@
         <% abas.forEach(aba => { %>
         <% const produtosDaAba = produtos.filter(produto => produto.tipo === aba.id); %>
         <% const categoriasDaAba = [...new Set(produtosDaAba.map(produto => produto.categoria).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR')); %>
-        <section class="painel-aba" id="aba-<%= aba.id %>" role="tabpanel" <%= abaAtiva === aba.id ? '' : 'hidden' %>>
+        <section class="painel-aba" id="aba-<%= aba.id %>" role="tabpanel" aria-labelledby="tab-<%= aba.id %>" <%= abaAtiva === aba.id ? '' : 'hidden' %>>
         <p class="aviso-aba"><i class="ph-bold <%= aba.icone %>"></i> <%= aba.aviso %></p>
 
         <% if (categoriasDaAba.length > 0) { %>
@@ -151,16 +151,38 @@
         }
 
         // Troca de aba sem recarregar a página (o link ?aba=... continua funcionando)
-        document.querySelectorAll('.aba').forEach(aba => {
+        const todasAsAbas = [...document.querySelectorAll('.aba')];
+
+        function ativarAba(aba) {
+            todasAsAbas.forEach(outra => {
+                const ativa = outra === aba;
+                outra.classList.toggle('ativa', ativa);
+                outra.setAttribute('aria-selected', ativa);
+                outra.tabIndex = ativa ? 0 : -1;
+                document.getElementById('aba-' + outra.dataset.aba).hidden = !ativa;
+            });
+            history.replaceState(null, '', '?aba=' + aba.dataset.aba);
+        }
+
+        todasAsAbas.forEach((aba, posicao) => {
             aba.addEventListener('click', (evento) => {
                 evento.preventDefault();
-                document.querySelectorAll('.aba').forEach(outra => {
-                    const ativa = outra === aba;
-                    outra.classList.toggle('ativa', ativa);
-                    outra.setAttribute('aria-selected', ativa);
-                    document.getElementById('aba-' + outra.dataset.aba).hidden = !ativa;
-                });
-                history.replaceState(null, '', '?aba=' + aba.dataset.aba);
+                ativarAba(aba);
+            });
+
+            // No teclado: setas trocam de aba, Home/End vão para a primeira/última
+            aba.addEventListener('keydown', (evento) => {
+                const destinos = {
+                    ArrowRight: todasAsAbas[(posicao + 1) % todasAsAbas.length],
+                    ArrowLeft: todasAsAbas[(posicao - 1 + todasAsAbas.length) % todasAsAbas.length],
+                    Home: todasAsAbas[0],
+                    End: todasAsAbas[todasAsAbas.length - 1]
+                };
+                const destino = destinos[evento.key];
+                if (!destino) return;
+                evento.preventDefault();
+                ativarAba(destino);
+                destino.focus();
             });
         });
 

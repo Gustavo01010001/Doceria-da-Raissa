@@ -20,15 +20,21 @@ const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 8 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        cb(null, file.mimetype.startsWith('image/'));
+        if (file.mimetype.startsWith('image/')) return cb(null, true);
+        const erro = new Error('O arquivo enviado não é uma imagem');
+        erro.code = 'NAO_E_IMAGEM';
+        cb(erro);
     }
 });
 
-// Mostra uma mensagem amigável se a foto for grande demais
+// Mostra uma mensagem amigável se a foto for grande demais ou não for foto
 const receberImagem = (req, res, next) => {
     upload.single('imagem')(req, res, (err) => {
         if (err) {
-            return res.status(400).send('A foto precisa ter no máximo 8 MB. <a href="javascript:history.back()">Voltar</a>');
+            let mensagem = 'Não consegui receber a foto. Tente de novo.';
+            if (err.code === 'LIMIT_FILE_SIZE') mensagem = 'A foto precisa ter no máximo 8 MB.';
+            if (err.code === 'NAO_E_IMAGEM') mensagem = 'Esse arquivo não é uma foto. Envie uma imagem JPG, PNG ou WEBP.';
+            return res.status(400).send(`${mensagem} <a href="javascript:history.back()">Voltar</a>`);
         }
         next();
     });

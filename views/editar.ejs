@@ -37,7 +37,7 @@
             box-sizing: border-box;
         }
 
-        h2 {
+        h1 {
             margin-top: 0;
             font-size: 22px;
             display: flex;
@@ -182,7 +182,7 @@
     <%- include('partials/tema') %>
 
     <div class="form-container">
-        <h2><i class="ph-fill ph-pencil-simple" style="color: var(--brand-color);"></i> Editar Doce</h2>
+        <h1><i class="ph-fill ph-pencil-simple" style="color: var(--brand-color);"></i> Editar Doce</h1>
 
         <% if (erro) { %>
             <div class="erro-msg"><%= erro %></div>
@@ -194,12 +194,12 @@
 
             <div class="form-group">
                 <label for="nome">Nome do Doce</label>
-                <input type="text" id="nome" name="nome" value="<%= produto.nome %>" required>
+                <input type="text" id="nome" name="nome" value="<%= produto.nome %>" maxlength="80" required>
             </div>
 
             <div class="form-group">
                 <label for="descricao">Descrição (Ingredientes, detalhes)</label>
-                <textarea id="descricao" name="descricao" rows="3" required><%= produto.descricao %></textarea>
+                <textarea id="descricao" name="descricao" rows="3" maxlength="500" required><%= produto.descricao %></textarea>
             </div>
 
             <div class="form-group">

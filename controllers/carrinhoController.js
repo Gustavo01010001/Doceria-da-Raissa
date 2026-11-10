@@ -17,8 +17,14 @@ function itemDoCarrinho(produto, quantidade) {
         preco: produto.preco,
         imagem: produto.imagem,
         tipo: produto.tipo,
+        estoque: produto.estoque,
         quantidade
     };
+}
+
+// Corta textos gigantes que alguém mande direto pro servidor (o formulário já limita)
+function limitar(texto, maximo) {
+    return String(texto || '').trim().slice(0, maximo);
 }
 
 function renderizarCarrinho(res, carrinho, erro = null, cliente = {}) {
@@ -123,19 +129,28 @@ class CarrinhoController {
         }
     }
 
-    alterarQuantidade(req, res) {
+    async alterarQuantidade(req, res) {
         const produtoId = parseInt(req.body.produtoId);
         const carrinho = req.session.carrinho || [];
         const item = carrinho.find(item => item.id === produtoId);
 
-        if (item) {
-            if (req.body.acao === 'mais') item.quantidade += 1;
-            if (req.body.acao === 'menos') item.quantidade -= 1;
-            if (req.body.acao === 'remover') item.quantidade = 0;
-        }
+        try {
+            if (item) {
+                // O "+" para no que ainda tem em estoque
+                if (req.body.acao === 'mais') {
+                    const produto = await Produto.buscarPorId(produtoId);
+                    if (produto && (produto.estoque === null || item.quantidade < produto.estoque)) item.quantidade += 1;
+                }
+                if (req.body.acao === 'menos') item.quantidade -= 1;
+                if (req.body.acao === 'remover') item.quantidade = 0;
+            }
 
-        req.session.carrinho = carrinho.filter(item => item.quantidade > 0);
-        res.redirect('/carrinho');
+            req.session.carrinho = carrinho.filter(item => item.quantidade > 0);
+            res.redirect('/carrinho');
+        } catch (error) {
+            console.error(error);
+            res.status(500).send("Erro ao alterar o carrinho");
+        }
     }
 
     limparCarrinho(req, res) {
@@ -152,12 +167,12 @@ class CarrinhoController {
             }
 
             const cliente = {
-                nome: (req.body.nome || '').trim(),
+                nome: limitar(req.body.nome, 80),
                 entrega: req.body.entrega === 'entrega' ? 'entrega' : 'retirada',
-                endereco: (req.body.endereco || '').trim(),
+                endereco: limitar(req.body.endereco, 300),
                 pagamento: PAGAMENTOS.includes(req.body.pagamento) ? req.body.pagamento : '',
-                dataEncomenda: (req.body.dataEncomenda || '').trim(),
-                observacoes: (req.body.observacoes || '').trim()
+                dataEncomenda: limitar(req.body.dataEncomenda, 10),
+                observacoes: limitar(req.body.observacoes, 500)
             };
 
             const prontaEntrega = carrinho.filter(item => item.tipo !== 'encomenda');

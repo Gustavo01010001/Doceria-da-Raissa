@@ -14,6 +14,11 @@ const verificarLogin = (req, res, next) => {
         next();
     }
 
+    // Pedido feito pelo JavaScript do painel (contador de pedidos): responde em JSON
+    else if ((req.get('Accept') || '').includes('application/json')) {
+        res.status(401).json({ erro: 'deslogada' });
+    }
+
     else {
         res.redirect('/login');
     }

@@ -34,7 +34,8 @@
                                 <input type="hidden" name="produtoId" value="<%= item.id %>">
                                 <button type="submit" name="acao" value="menos" aria-label="Diminuir"><i class="ph-bold ph-minus"></i></button>
                                 <span class="numero"><%= item.quantidade %></span>
-                                <button type="submit" name="acao" value="mais" aria-label="Aumentar"><i class="ph-bold ph-plus"></i></button>
+                                <% const noLimite = item.estoque !== null && item.estoque !== undefined && item.quantidade >= item.estoque; %>
+                                <button type="submit" name="acao" value="mais" aria-label="<%= noLimite ? 'Aumentar (já pegou tudo que tem em estoque)' : 'Aumentar' %>" <%= noLimite ? 'disabled' : '' %>><i class="ph-bold ph-plus"></i></button>
                                 <button type="submit" name="acao" value="remover" class="remover" aria-label="Remover"><i class="ph ph-trash"></i></button>
                             </form>
                         </div>
@@ -59,7 +60,7 @@
 
                     <div class="campo">
                         <label for="nome">Seu nome</label>
-                        <input type="text" id="nome" name="nome" value="<%= cliente.nome || '' %>" autocomplete="name" required>
+                        <input type="text" id="nome" name="nome" value="<%= cliente.nome || '' %>" autocomplete="name" maxlength="80" required>
                     </div>
 
                     <div class="campo">
@@ -78,7 +79,7 @@
 
                     <div class="campo" id="campo-endereco" <%= cliente.entrega === 'entrega' ? '' : 'hidden' %>>
                         <label for="endereco">Endereço de entrega</label>
-                        <textarea id="endereco" name="endereco" rows="2" placeholder="Rua, número, bairro e complemento" autocomplete="street-address"><%= cliente.endereco || '' %></textarea>
+                        <textarea id="endereco" name="endereco" rows="2" placeholder="Rua, número, bairro e complemento" autocomplete="street-address" maxlength="300" <%= cliente.entrega === 'entrega' ? 'required' : '' %>><%= cliente.endereco || '' %></textarea>
                         <div class="dica">A taxa de entrega é combinada pelo WhatsApp.</div>
                     </div>
 
@@ -111,7 +112,7 @@
 
                     <div class="campo">
                         <label for="observacoes">Observações <span style="font-weight: 400; color: var(--cor-texto-suave);">(opcional)</span></label>
-                        <textarea id="observacoes" name="observacoes" rows="2" placeholder="Ex: horário de preferência, sem granulado..."><%= cliente.observacoes || '' %></textarea>
+                        <textarea id="observacoes" name="observacoes" rows="2" placeholder="Ex: horário de preferência, sem granulado..." maxlength="500"><%= cliente.observacoes || '' %></textarea>
                     </div>
                 </div>
 

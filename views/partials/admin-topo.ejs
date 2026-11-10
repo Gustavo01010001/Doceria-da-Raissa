@@ -6,8 +6,16 @@
     <div class="topbar-links">
         <%- include('tema', { embutido: true }) %>
         <a href="/" class="btn-link"><i class="ph ph-eye"></i> Ver Loja</a>
-        <a href="/logout" class="btn-link"><i class="ph ph-sign-out"></i> Sair</a>
+        <form action="/logout" method="POST" class="form-sair">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button type="submit" class="btn-link"><i class="ph ph-sign-out"></i> Sair</button>
+        </form>
     </div>
+</div>
+
+<div class="aviso-sessao" id="aviso-sessao" role="alert" hidden>
+    <i class="ph-bold ph-warning-circle"></i>
+    <span>Sua sessão terminou e o painel parou de atualizar. <a href="/login">Entrar de novo</a></span>
 </div>
 
 <nav class="abas-painel">
@@ -34,14 +42,20 @@
         async function conferir() {
             try {
                 const resposta = await fetch('/admin/pedidos/novos', { headers: { 'Accept': 'application/json' } });
+                // Deslogada (sessão venceu ou saiu em outra aba): avisa e para de perguntar
+                if (resposta.status === 401) {
+                    document.getElementById('aviso-sessao').hidden = false;
+                    clearInterval(repeticao);
+                    return;
+                }
                 const dados = await resposta.json();
                 if (typeof dados.novos === 'number') mostrar(dados.novos);
             } catch (erro) {
-                // Sem internet ou deslogada: tenta de novo na próxima
+                // Sem internet: tenta de novo na próxima
             }
         }
 
         mostrar(<%= pedidosNovos %>);
-        setInterval(conferir, 30000);
+        const repeticao = setInterval(conferir, 30000);
     })();
 </script>

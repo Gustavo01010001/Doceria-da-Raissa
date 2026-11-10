@@ -25,6 +25,39 @@ const app = express();
 // Necessário quando hospedado atrás de proxy (Render, Railway etc.)
 app.set('trust proxy', 1);
 
+// Não conta pra quem visita que o site é feito em Express
+app.disable('x-powered-by');
+
+// Fontes do Google e ícones do unpkg são as únicas coisas de fora que as páginas carregam
+const POLITICA_DE_CONTEUDO = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://unpkg.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
+    "font-src 'self' data: https://fonts.gstatic.com https://unpkg.com",
+    "img-src 'self' data: blob:",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'"
+].join('; ');
+
+// Cabeçalhos de segurança: outro site não consegue abrir a loja ou o painel dentro de um iframe,
+// o navegador não "adivinha" o tipo dos arquivos e só carrega scripts daqui e do unpkg
+app.use((req, res, next) => {
+    res.set({
+        'Content-Security-Policy': POLITICA_DE_CONTEUDO,
+        'X-Frame-Options': 'DENY',
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+    });
+    // Online com cadeado: o navegador passa a usar sempre HTTPS
+    if (process.env.NODE_ENV === 'production' && req.secure) {
+        res.set('Strict-Transport-Security', 'max-age=31536000');
+    }
+    next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -75,6 +108,19 @@ app.use('/admin', adminRoutes);
 
 app.use((req, res) => {
     res.status(404).render('404');
+});
+
+// Erros que escaparam: mostra uma mensagem simples, sem o caminho dos arquivos do servidor
+app.use((erro, req, res, next) => {
+    if (res.headersSent) return next(erro);
+    if (erro.type === 'entity.too.large') {
+        return res.status(413).send('O conteúdo enviado é grande demais. <a href="/">Voltar para a loja</a>');
+    }
+    if (erro.type === 'entity.parse.failed' || erro.status === 400) {
+        return res.status(400).send('Não entendi o que foi enviado. <a href="/">Voltar para a loja</a>');
+    }
+    console.error(erro);
+    res.status(500).send('Algo deu errado. Tente de novo daqui a pouco. <a href="/">Voltar para a loja</a>');
 });
 
 const PORT = process.env.PORT || 3000;

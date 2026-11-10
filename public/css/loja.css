@@ -75,8 +75,8 @@
     position: absolute;
     top: calc(12px + env(safe-area-inset-top, 0px));
     right: 12px;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     border: none;
     background: var(--cor-chip);
@@ -196,8 +196,8 @@ button, input, textarea, select { font-family: inherit; }
 }
 
 .btn-icone {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: var(--cor-chip);
     display: inline-flex;
@@ -670,8 +670,9 @@ form { margin: 0; }
 }
 
 .quantidade button {
-    width: 30px;
-    height: 30px;
+    position: relative;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     border: 1px solid var(--cor-borda);
     background: var(--cor-superficie);
@@ -683,7 +684,11 @@ form { margin: 0; }
     justify-content: center;
 }
 
+/* Área de toque de 44px no celular, sem aumentar o desenho do botão */
+.quantidade button::before { content: ''; position: absolute; inset: -4px; border-radius: 50%; }
 .quantidade button:hover { background: var(--cor-rosa-claro); }
+.quantidade button:disabled { opacity: 0.35; cursor: not-allowed; }
+.quantidade button:disabled:hover { background: var(--cor-superficie); }
 .quantidade .numero { min-width: 26px; text-align: center; font-weight: 800; }
 .quantidade .remover { border: none; color: var(--cor-texto-suave); margin-left: 6px; }
 

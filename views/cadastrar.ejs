@@ -35,8 +35,8 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
         }
 
-        h2 { 
-            margin-top: 0; 
+        h1 {
+            margin-top: 0;
             font-size: 22px; 
             display: flex; 
             align-items: center; 
@@ -156,7 +156,7 @@
     <%- include('partials/tema') %>
 
     <div class="form-container">
-        <h2><i class="ph-fill ph-plus-circle" style="color: var(--brand-color);"></i> Cadastrar Doce</h2>
+        <h1><i class="ph-fill ph-plus-circle" style="color: var(--brand-color);"></i> Cadastrar Doce</h1>
         
         <% if (erro) { %>
             <div class="erro-msg"><%= erro %></div>
@@ -167,12 +167,12 @@
 
             <div class="form-group">
                 <label for="nome">Nome do Doce</label>
-                <input type="text" id="nome" name="nome" value="<%= valores.nome || '' %>" placeholder="Ex: Bolo de Pote de Morango" required>
+                <input type="text" id="nome" name="nome" value="<%= valores.nome || '' %>" placeholder="Ex: Bolo de Pote de Morango" maxlength="80" required>
             </div>
 
             <div class="form-group">
                 <label for="descricao">Descrição (Ingredientes, detalhes)</label>
-                <textarea id="descricao" name="descricao" rows="3" placeholder="Ex: Feito com morangos frescos e leite condensado..." required><%= valores.descricao || '' %></textarea>
+                <textarea id="descricao" name="descricao" rows="3" placeholder="Ex: Feito com morangos frescos e leite condensado..." maxlength="500" required><%= valores.descricao || '' %></textarea>
             </div>
 
             <div class="form-group">

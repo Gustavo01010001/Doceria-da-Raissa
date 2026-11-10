@@ -4,6 +4,14 @@ const Produto = require('../models/produtoModel');
 const Configuracao = require('../models/configuracaoModel');
 const { converterPreco } = require('../utils/formatar');
 
+// Tamanho máximo dos textos do produto (o formulário também limita)
+const MAXIMO_NOME = 80;
+const MAXIMO_DESCRICAO = 500;
+
+function limitar(texto, maximo) {
+    return String(texto || '').trim().slice(0, maximo);
+}
+
 function converterTipo(tipo) {
     return tipo === 'encomenda' ? 'encomenda' : 'pronta';
 }
@@ -78,7 +86,7 @@ class AdminController {
                 });
             }
 
-            await Produto.incluir(nome.trim(), (descricao || '').trim(), preco, imagemCaminho, tipo, converterCategoria(req.body.categoria), estoque);
+            await Produto.incluir(limitar(nome, MAXIMO_NOME), limitar(descricao, MAXIMO_DESCRICAO), preco, imagemCaminho, tipo, converterCategoria(req.body.categoria), estoque);
             res.redirect('/admin');
         } catch (error) {
             console.error(error);
@@ -121,7 +129,7 @@ class AdminController {
                 });
             }
 
-            await Produto.alterar(id, nome.trim(), (descricao || '').trim(), preco, tipo, converterCategoria(req.body.categoria), estoque, imagemNova);
+            await Produto.alterar(id, limitar(nome, MAXIMO_NOME), limitar(descricao, MAXIMO_DESCRICAO), preco, tipo, converterCategoria(req.body.categoria), estoque, imagemNova);
             if (imagemNova) apagarImagem(produto.imagem);
             res.redirect('/admin');
         } catch (error) {
