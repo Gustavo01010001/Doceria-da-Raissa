@@ -2,10 +2,17 @@ function formatarPreco(valor) {
     return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
 }
 
-// Aceita "15,50", "15.50" ou "15". Retorna null se não for um preço válido.
+// Aceita "15", "15,5", "15,50", "15.50" e com ponto de milhar ("1.234,56").
+// Retorna null se tiver letra, mais de 2 casas depois da vírgula ou for zero.
 function converterPreco(texto) {
-    const valor = parseFloat(String(texto || '').trim().replace(',', '.'));
-    return Number.isFinite(valor) && valor >= 0 ? Math.round(valor * 100) / 100 : null;
+    let valor = String(texto || '').trim().replace(/^R\$\s*/i, '');
+    if (/^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(valor)) {
+        valor = valor.replace(/\./g, '');
+    } else if (!/^\d+([.,]\d{1,2})?$/.test(valor)) {
+        return null;
+    }
+    const numero = Number(valor.replace(',', '.'));
+    return numero > 0 ? Math.round(numero * 100) / 100 : null;
 }
 
 // Data de hoje no horário de Brasília + N dias, no formato "AAAA-MM-DD" (o mesmo do <input type="date">)

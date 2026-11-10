@@ -71,6 +71,20 @@ class Produto {
         return resultado.changes === 1;
     }
 
+    // Tira do estoque os itens de pronta entrega de um pedido. Se algum não tiver mais o suficiente,
+    // devolve o que já tinha tirado e retorna o nome dele (null = deu certo pra todos).
+    static async reservarEstoque(itens) {
+        const reservados = [];
+        for (const item of itens.filter(item => item.tipo !== 'encomenda')) {
+            if (!(await Produto.baixarEstoque(item.id, item.quantidade))) {
+                for (const reservado of reservados) await Produto.devolverEstoque(reservado.id, reservado.quantidade);
+                return item.nome;
+            }
+            reservados.push(item);
+        }
+        return null;
+    }
+
     // Devolve as unidades (pedido cancelado). Produtos sem controle de estoque ficam como estão.
     static async devolverEstoque(id, quantidade) {
         const db = await initDB();

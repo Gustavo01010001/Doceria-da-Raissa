@@ -2,8 +2,13 @@ const Produto = require('../models/produtoModel');
 const Pedido = require('../models/pedidoModel');
 const loja = require('../config/loja');
 const { formatarPreco, dataDaquiA, formatarData, dataValida } = require('../utils/formatar');
+const { criarLimitador } = require('../utils/limitador');
 
 const PAGAMENTOS = ['Pix', 'Dinheiro', 'Cartão'];
+
+// No máximo 5 pedidos a cada 30 minutos por IP: um robô não consegue reservar o estoque todo
+// mandando pedido atrás de pedido (cliente de verdade não chega perto disso)
+const pedidosRecentes = criarLimitador({ maximo: 5, janela: 30 * 60 * 1000 });
 
 function itemDoCarrinho(produto, quantidade) {
     return {
@@ -58,20 +63,6 @@ async function sincronizarCarrinho(req) {
 
 function avisoDeAjuste(ajustados) {
     return ajustados.length > 0 ? `Ajustamos a quantidade de: ${ajustados.join(', ')}.` : null;
-}
-
-// Tira do estoque os itens de pronta entrega. Se algum não tiver mais o suficiente
-// (outro cliente comprou antes), devolve o que já tinha tirado e retorna o nome dele.
-async function reservarEstoque(itens) {
-    const reservados = [];
-    for (const item of itens.filter(item => item.tipo !== 'encomenda')) {
-        if (!(await Produto.baixarEstoque(item.id, item.quantidade))) {
-            for (const reservado of reservados) await Produto.devolverEstoque(reservado.id, reservado.quantidade);
-            return item.nome;
-        }
-        reservados.push(item);
-    }
-    return null;
 }
 
 class CarrinhoController {
@@ -174,7 +165,8 @@ class CarrinhoController {
             const dataMinima = dataDaquiA(loja.antecedenciaEncomenda);
 
             let erro = null;
-            if (!cliente.nome) erro = 'Informe seu nome.';
+            if (pedidosRecentes.bloqueado(req.ip)) erro = 'Você já enviou vários pedidos agora há pouco. Se precisar de mais alguma coisa, chame a gente no WhatsApp.';
+            else if (!cliente.nome) erro = 'Informe seu nome.';
             else if (cliente.entrega === 'entrega' && !cliente.endereco) erro = 'Informe o endereço de entrega.';
             else if (encomendas.length > 0 && !dataValida(cliente.dataEncomenda)) erro = 'Escolha a data da encomenda.';
             else if (encomendas.length > 0 && cliente.dataEncomenda < dataMinima) erro = `A encomenda precisa ser para ${formatarData(dataMinima)} ou depois.`;
@@ -183,7 +175,7 @@ class CarrinhoController {
             else if (ajustados.length > 0) erro = avisoDeAjuste(ajustados);
 
             if (!erro) {
-                const esgotou = await reservarEstoque(carrinho);
+                const esgotou = await Produto.reservarEstoque(carrinho);
                 if (esgotou) erro = `Ops, ${esgotou} acabou de esgotar. Confira o carrinho e tente de novo.`;
             }
 
@@ -222,6 +214,7 @@ class CarrinhoController {
                 itens: carrinho.map(item => ({ id: item.id, nome: item.nome, preco: item.preco, quantidade: item.quantidade, tipo: item.tipo })),
                 total
             });
+            pedidosRecentes.registrar(req.ip);
 
             req.session.carrinho = [];
 

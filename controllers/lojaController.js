@@ -1,5 +1,9 @@
 const Produto = require('../models/produtoModel');
 const loja = require('../config/loja');
+const { criarLimitador } = require('../utils/limitador');
+
+// Depois de 10 senhas erradas, o mesmo IP espera 15 minutos (contra robô chutando senha)
+const errosDeLogin = criarLimitador({ maximo: 10, janela: 15 * 60 * 1000 });
 
 class LojaController {
 
@@ -35,12 +39,28 @@ class LojaController {
     autenticarUsuario(req, res) {
         const { usuario, senha } = req.body;
 
-        if (usuario === loja.adminUsuario && senha === loja.adminSenha) {
+        if (errosDeLogin.bloqueado(req.ip)) {
+            return res.status(429).render('login', { erro: 'Muitas tentativas erradas. Espere 15 minutos e tente de novo.' });
+        }
+
+        if (usuario !== loja.adminUsuario || senha !== loja.adminSenha) {
+            errosDeLogin.registrar(req.ip);
+            return res.status(401).render('login', { erro: 'Usuário ou senha incorretos!' });
+        }
+
+        errosDeLogin.limpar(req.ip);
+
+        // Sessão nova ao entrar: um código de sessão pego antes do login não abre o painel
+        const carrinho = req.session.carrinho;
+        req.session.regenerate((erro) => {
+            if (erro) {
+                console.error(erro);
+                return res.status(500).send('Erro ao entrar. Tente de novo.');
+            }
+            if (carrinho) req.session.carrinho = carrinho;
             req.session.logado = true;
             res.redirect('/admin');
-        } else {
-            res.status(401).render('login', { erro: 'Usuário ou senha incorretos!' });
-        }
+        });
     }
 
     fazerLogout(req, res) {

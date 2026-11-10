@@ -23,6 +23,15 @@ function itensDoEstoque(pedido) {
     return pedido.itens.filter(item => item.id && item.tipo !== 'encomenda');
 }
 
+// Só os doces que ainda estão no cardápio (a chef pode ter apagado algum depois do pedido)
+async function itensQueAindaExistem(itens) {
+    const existentes = [];
+    for (const item of itens) {
+        if (await Produto.buscarPorId(item.id)) existentes.push(item);
+    }
+    return existentes;
+}
+
 class PedidoController {
 
     constructor() {
@@ -35,6 +44,9 @@ class PedidoController {
     async exibirPedidos(req, res) {
         // ?status=novo filtra a lista; sem nada, mostra todos
         const filtro = Object.hasOwn(Pedido.STATUS, req.query.status) ? req.query.status : null;
+        // Aviso deixado pela última ação (aparece uma vez só)
+        const aviso = req.session.avisoPedidos || null;
+        delete req.session.avisoPedidos;
         try {
             const [pedidos, encomendas, contagem] = await Promise.all([
                 Pedido.buscarTodos(filtro),
@@ -58,6 +70,7 @@ class PedidoController {
                 encomendasPorData,
                 contagem,
                 filtro,
+                aviso,
                 statusPedido: Pedido.STATUS
             });
         } catch (error) {
@@ -73,11 +86,16 @@ class PedidoController {
         try {
             const pedido = await Pedido.buscarPorId(id);
             if (pedido && Object.hasOwn(Pedido.STATUS, status) && status !== pedido.status) {
-                // Cancelou: as unidades voltam pro estoque. Desfez o cancelamento: saem de novo (se ainda tiver).
+                // Cancelou: as unidades voltam pro estoque. Desfez o cancelamento: saem de novo,
+                // e se algum doce não tiver mais o suficiente o pedido continua cancelado.
                 if (status === 'cancelado') {
                     for (const item of itensDoEstoque(pedido)) await Produto.devolverEstoque(item.id, item.quantidade);
                 } else if (pedido.status === 'cancelado') {
-                    for (const item of itensDoEstoque(pedido)) await Produto.baixarEstoque(item.id, item.quantidade);
+                    const esgotou = await Produto.reservarEstoque(await itensQueAindaExistem(itensDoEstoque(pedido)));
+                    if (esgotou) {
+                        req.session.avisoPedidos = `Não deu para reabrir o pedido #${pedido.id}: ${esgotou} não tem mais estoque suficiente. Aumente o estoque no cardápio e tente de novo.`;
+                        return res.redirect(voltar);
+                    }
                 }
                 await Pedido.alterarStatus(id, status);
             }

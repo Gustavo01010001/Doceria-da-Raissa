@@ -87,6 +87,20 @@
         .filtro:hover { border-color: var(--borda-forte); color: var(--text-main); }
         .filtro.ativo { background: var(--btn-bg); border-color: var(--btn-bg); color: var(--btn-texto); }
 
+        .aviso-erro {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            background: var(--danger-bg);
+            color: var(--danger-text);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .aviso-erro i { font-size: 18px; flex-shrink: 0; }
+
         .lista-pedidos { display: flex; flex-direction: column; gap: 12px; }
 
         .pedido-topo {
@@ -172,6 +186,10 @@
             <h1>Pedidos</h1>
             <p>Os pedidos enviados pelo WhatsApp ficam guardados aqui</p>
         </div>
+
+        <% if (aviso) { %>
+            <div class="aviso-erro" role="alert"><i class="ph-bold ph-warning-circle"></i> <span><%= aviso %></span></div>
+        <% } %>
 
         <% const datas = Object.keys(encomendasPorData); %>
         <% if (datas.length > 0) { %>
