@@ -22,6 +22,10 @@
         const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (!semMovimento && !raiz.dataset.leve && !sessionStorage.getItem('<%= chaveIntro %>')) {
             raiz.dataset.intro = 'sim';
+            // Barra do celular (relógio/bateria) escura junto com a intro: em tela sem moldura
+            // ela se emenda com a intro, em vez de ficar uma faixa rosa em cima
+            const barra = document.querySelector('meta[name="theme-color"]');
+            if (barra) barra.content = '#1c0d14';
             sessionStorage.setItem('<%= chaveIntro %>', '1');
         }
     } catch (erro) {}
@@ -297,6 +301,16 @@
         animation: intro-aparecer 0.4s ease-out 0.8s forwards;
     }
 
+    /* Celular deitado (tela baixa): tudo um pouco menor para caber sem encostar nas bordas */
+    @media (max-height: 500px) {
+        :root[data-intro] .intro { padding-bottom: 4vh; }
+        .intro-palco { gap: 6px; }
+        .intro-emblema { width: 96px; height: 96px; }
+        .intro-miolo { width: 76px; height: 76px; font-size: 40px; }
+        .intro-nome { font-size: clamp(26px, 8vh, 34px); margin-top: 4px; }
+        .intro-sub { font-size: 11px; }
+    }
+
     @keyframes intro-juntar {
         0% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1.4); }
         25% { opacity: 1; }
@@ -386,9 +400,18 @@
             return [...document.body.children].filter(el => el !== intro && !['SCRIPT', 'STYLE', 'LINK'].includes(el.tagName));
         }
 
+        // Devolve a cor da barra do celular para a cor do tema da página
+        function voltarCorDaBarra() {
+            const barra = document.querySelector('meta[name="theme-color"]');
+            if (!barra) return;
+            const escuro = (raiz.dataset.tema || (matchMedia('(prefers-color-scheme: dark)').matches ? 'escuro' : 'claro')) === 'escuro';
+            barra.content = (escuro ? barra.dataset.escuro : barra.dataset.claro) || barra.content;
+        }
+
         function terminar() {
             if (terminou) return;
             terminou = true;
+            voltarCorDaBarra();
             delete raiz.dataset.intro;
             animacoes.forEach(animacao => animacao.cancel());
             intro.remove();
@@ -398,6 +421,7 @@
         function pular() {
             if (terminou || saindo) return;
             saindo = true;
+            voltarCorDaBarra();
             intro.style.pointerEvents = 'none';
             partesDaLoja().forEach(parte => animar(parte, [{ opacity: 0 }, { opacity: 1 }], { duration: 250 }));
             animar(intro, [{ opacity: 1 }, { opacity: 0 }], { duration: 250 });
@@ -414,6 +438,9 @@
             const nome = intro.querySelector('.intro-nome');
             const textoDoNome = intro.querySelector('.intro-nome-texto');
             const palco = intro.querySelector('.intro-palco');
+            const miolo = intro.querySelector('.intro-miolo');
+            // A barra do celular troca de cor no meio do sumiço do fundo
+            setTimeout(voltarCorDaBarra, 400);
 
             // Para onde voar: o logo 🧁 e o título da loja (só existem na vitrine)
             const logo = document.querySelector('.topo-logo');
@@ -426,10 +453,11 @@
                 const rTitulo = faixa.getBoundingClientRect();
                 const rEmblema = emblema.getBoundingClientRect();
                 const rNome = textoDoNome.getBoundingClientRect();
-                if (rLogo.bottom > 0 && rTitulo.bottom > 0 && rTitulo.top < innerHeight && rNome.width > 0) {
+                const rMiolo = miolo.getBoundingClientRect();
+                if (rLogo.bottom > 0 && rTitulo.bottom > 0 && rTitulo.top < innerHeight && rNome.width > 0 && rMiolo.width > 0) {
                     const a = centro(rEmblema), b = centro(rLogo), c = centro(rNome), d = centro(rTitulo);
                     voo = {
-                        emblema: `translate(${b.x - a.x}px, ${b.y - a.y}px) scale(${rLogo.width / 112})`,
+                        emblema: `translate(${b.x - a.x}px, ${b.y - a.y}px) scale(${rLogo.width / rMiolo.width})`,
                         nome: `translate(${d.x - c.x}px, ${d.y - c.y}px) scale(${rTitulo.width / rNome.width})`
                     };
                 }

@@ -12,8 +12,11 @@
             const escuro = temaAtual() === 'escuro';
             botao.innerHTML = escuro ? '<i class="ph-bold ph-sun"></i>' : '<i class="ph-bold ph-moon"></i>';
             botao.setAttribute('aria-label', escuro ? 'Mudar para modo claro' : 'Mudar para modo escuro');
+            // Cor da barra do celular (relógio/bateria): cada página diz a sua no data-claro/data-escuro
             const corDaBarra = document.querySelector('meta[name="theme-color"]');
-            if (corDaBarra) corDaBarra.content = escuro ? '#3d2530' : '#ffb6c1';
+            if (corDaBarra && !document.documentElement.dataset.intro) {
+                corDaBarra.content = escuro ? (corDaBarra.dataset.escuro || '#3d2530') : (corDaBarra.dataset.claro || '#ffb6c1');
+            }
         }
 
         botao.addEventListener('click', () => {
