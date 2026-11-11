@@ -170,7 +170,8 @@ button, input, textarea, select { font-family: inherit; }
     text-decoration: none;
     font-weight: 700;
     font-size: 14px;
-    padding: 8px 14px;
+    min-height: 44px; /* área de toque confortável no celular */
+    padding: 8px 16px;
     border-radius: 999px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
@@ -230,6 +231,8 @@ button, input, textarea, select { font-family: inherit; }
 
 .aba {
     flex: 1;
+    min-width: 0; /* deixa a aba encolher em vez de passar da tela */
+    min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -390,6 +393,13 @@ button, input, textarea, select { font-family: inherit; }
     .grid-cardapio { grid-template-columns: 1fr; }
 }
 
+/* Celular pequeno (320px): as duas abas cabem lado a lado sem cortar o contador */
+@media (max-width: 360px) {
+    .abas { gap: 4px; }
+    .aba { gap: 4px; padding: 11px 4px; font-size: 13px; }
+    .aba i { font-size: 15px; }
+}
+
 @media (min-width: 640px) {
     .grid-cardapio {
         grid-template-columns: repeat(auto-fit, 250px);
@@ -494,6 +504,7 @@ form { margin: 0; }
 
 .btn-comprar {
     width: 100%;
+    min-height: 44px;
     padding: 11px 10px;
     background-color: var(--cor-botao);
     color: white;
@@ -529,7 +540,12 @@ form { margin: 0; }
     font-size: 13px;
 }
 
-.rodape a { color: var(--cor-texto-suave); }
+.rodape a {
+    color: var(--cor-texto-suave);
+    display: inline-block;
+    padding: 13px 8px; /* área de toque de 44px no link "Área da chef" */
+    margin: -13px -8px;
+}
 
 /* ---------- Barra do carrinho (fixa embaixo) ---------- */
 
