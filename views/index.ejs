@@ -130,7 +130,7 @@
 
     <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
 
-    <script>
+    <script nonce="<%= nonce %>">
         const barra = document.getElementById('barra-carrinho');
         const aviso = document.getElementById('aviso');
         let timerAviso;
@@ -213,11 +213,13 @@
                         headers: { 'Accept': 'application/json' },
                         body: new URLSearchParams(new FormData(form))
                     });
-                    if (!resposta.ok) throw new Error();
-                    const dados = await resposta.json();
+                    const dados = await resposta.json().catch(() => null);
+                    if (!dados) throw new Error();
                     if (dados.ok) {
                         atualizarBarra(dados);
                         mostrarAviso(dados.nome + ' adicionado! 🧁');
+                    } else if (dados.motivo === 'muitos') {
+                        mostrarAviso('Muitas tentativas agora. Espere uns minutinhos e tente de novo.');
                     } else if (dados.motivo === 'limite') {
                         mostrarAviso(`Você já pegou ${dados.estoque === 1 ? 'o último' : 'todos os ' + dados.estoque} 😊`);
                     } else if (dados.motivo === 'pausada') {

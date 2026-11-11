@@ -73,6 +73,19 @@
 
 input[type="text"], textarea { background-color: var(--card-bg); }
 
+/* Texto comprido sem espaço (ex: um link colado nas observações do pedido, ou um nome
+   enorme) quebra a linha em vez de esticar a página para os lados */
+.caixa, .produto-detalhes { overflow-wrap: anywhere; }
+
+/* Área de toque de pelo menos 44px nos botões e campos do painel (dedo no celular) */
+.abas-painel a,
+.btn-action,
+.btn-primary,
+.btn-salvar,
+.btn-cancelar,
+.pausa input[type="text"] { min-height: 44px; }
+.filtros .filtro { display: inline-flex; align-items: center; min-height: 44px; }
+
 /* Topo e abas das páginas do painel (Cardápio, Pedidos, Vendas) */
 .topbar {
     background: var(--card-bg);

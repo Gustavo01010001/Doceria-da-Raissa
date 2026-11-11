@@ -16,7 +16,7 @@
     vídeo, sem redesenhar a tela). Nada de blur, máscara animada ou sombra animada.
 %>
 <% const chaveIntro = 'intro-' + (typeof chave !== 'undefined' ? chave : 'loja'); %>
-<script>
+<script nonce="<%= nonce %>">
     try {
         const raiz = document.documentElement;
         const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -377,7 +377,7 @@
     <span class="intro-pular intro-enfeite">Toque para pular</span>
 </div>
 
-<script>
+<script nonce="<%= nonce %>">
     (() => {
         const raiz = document.documentElement;
         const intro = document.getElementById('intro');

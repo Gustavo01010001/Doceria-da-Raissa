@@ -27,7 +27,13 @@
     <a href="/admin/vendas" class="<%= ativa === 'vendas' ? 'ativa' : '' %>"><i class="ph ph-chart-bar"></i> Vendas</a>
 </nav>
 
-<script>
+<script nonce="<%= nonce %>">
+    // Botões que pedem confirmação antes (ex: excluir doce, cancelar pedido): <form data-confirmar="...">
+    document.addEventListener('submit', (evento) => {
+        const pergunta = evento.target.dataset && evento.target.dataset.confirmar;
+        if (pergunta && !confirm(pergunta)) evento.preventDefault();
+    });
+
     // Confere a cada 30 segundos se chegou pedido novo e atualiza o contador e o título da aba
     (function () {
         const contador = document.getElementById('contador-pedidos');

@@ -289,7 +289,7 @@
                                 <i class="ph ph-pencil-simple"></i> Editar
                             </a>
                             
-                            <form action="/admin/excluir" method="POST" onsubmit="return confirm('Tem certeza que deseja apagar este produto do cardápio?');">
+                            <form action="/admin/excluir" method="POST" data-confirmar="Tem certeza que deseja apagar este produto do cardápio?">
                                 <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <input type="hidden" name="id" value="<%= produto.id %>">
                                 <button type="submit" class="btn-action delete">

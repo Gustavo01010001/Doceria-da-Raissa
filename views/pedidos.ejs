@@ -123,6 +123,7 @@
         .detalhes { font-size: 13px; color: var(--text-muted); display: grid; gap: 4px; margin-bottom: 14px; }
         .detalhes i { margin-right: 4px; }
         .detalhes strong { color: var(--text-main); font-weight: 600; }
+        .detalhes .observacoes { white-space: pre-line; } /* mantém as linhas que o cliente escreveu */
 
         .badge {
             display: inline-block;
@@ -266,13 +267,13 @@
                             <% } %>
                             <div><i class="ph ph-wallet"></i> Pagamento: <strong><%= pedido.pagamento %></strong></div>
                             <% if (pedido.observacoes) { %>
-                                <div><i class="ph ph-note"></i> <%= pedido.observacoes %></div>
+                                <div class="observacoes"><i class="ph ph-note"></i> <%= pedido.observacoes %></div>
                             <% } %>
                         </div>
 
                         <div class="acoes">
                             <% Object.entries(statusPedido).filter(([chave]) => chave !== pedido.status).forEach(([chave, nome]) => { %>
-                                <form action="/admin/pedidos/status" method="POST" <%- chave === 'cancelado' ? `onsubmit="return confirm('Cancelar o pedido #${pedido.id}?');"` : '' %>>
+                                <form action="/admin/pedidos/status" method="POST"<% if (chave === 'cancelado') { %> data-confirmar="Cancelar o pedido #<%= pedido.id %>?"<% } %>>
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                     <input type="hidden" name="id" value="<%= pedido.id %>">
                                     <input type="hidden" name="status" value="<%= chave %>">

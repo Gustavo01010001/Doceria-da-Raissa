@@ -2,15 +2,18 @@ const Pedido = require('../models/pedidoModel');
 const Produto = require('../models/produtoModel');
 const { dataDaquiA } = require('../utils/formatar');
 
-// Soma as quantidades por doce: [{ nome, quantidade, total }], do que mais saiu pro que menos saiu
+// Soma as quantidades por doce: [{ nome, quantidade, total }], do que mais saiu pro que menos saiu.
+// Usa Map (e não um objeto comum): assim um doce com nome estranho, tipo "__proto__", entra na
+// conta normalmente e não mexe nos objetos internos do JavaScript.
 function somarItens(itens) {
-    const soma = {};
+    const soma = new Map();
     for (const item of itens) {
-        soma[item.nome] ||= { nome: item.nome, quantidade: 0, total: 0 };
-        soma[item.nome].quantidade += item.quantidade;
-        soma[item.nome].total += item.preco * item.quantidade;
+        if (!soma.has(item.nome)) soma.set(item.nome, { nome: item.nome, quantidade: 0, total: 0 });
+        const doce = soma.get(item.nome);
+        doce.quantidade += item.quantidade;
+        doce.total += item.preco * item.quantidade;
     }
-    return Object.values(soma).sort((a, b) => b.quantidade - a.quantidade || a.nome.localeCompare(b.nome, 'pt-BR'));
+    return [...soma.values()].sort((a, b) => b.quantidade - a.quantidade || a.nome.localeCompare(b.nome, 'pt-BR'));
 }
 
 function resumir(pedidos) {

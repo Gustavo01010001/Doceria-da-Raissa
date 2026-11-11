@@ -38,7 +38,9 @@ npm run dev            # mesmo, com nodemon (reinicia sozinho)
    ```
 2. Back: testes por HTTP com `fetch` (cookies na mão, `redirect: 'manual'`). Cada cliente simulado
    precisa de um IP diferente no cabeçalho `X-Forwarded-For`, senão os limites por IP atrapalham.
-   Última rodada: **117/117 passaram** (login, CSRF, XSS, carrinho, estoque, pedidos, fotos, preço...).
+   Última rodada (11/11/2026): **162/162 passaram** (login, CSRF, XSS, CSP com nonce, SQL, uploads,
+   carrinho, estoque, pedidos, limites por IP, mensagem do WhatsApp...). Rode o roteiro **uma vez por
+   servidor**: os limites por IP ficam na memória e uma segunda rodada já começa bloqueada.
 3. Front: navegador do app em tamanho de celular (375px e 320px), temas claro e escuro,
    contraste mínimo 4,5, área de toque de 44px, sem erros no console. Sem enviar pedido.
 4. No fim: desligar o servidor de teste e conferir que não sobrou foto nova em `public/uploads`.
@@ -70,6 +72,13 @@ npm run dev            # mesmo, com nodemon (reinicia sozinho)
 - Desempenho: ícones locais (antes ~670 KB do unpkg), miniaturas de 600px na vitrine, carrinho e painel,
   modo leve automático em aparelho fraco (até 2 GB de memória), sem animações com "reduzir movimento".
 - `nodemon` fixo em 3.1.11 (correção de segurança). `npm audit`: 0 vulnerabilidades.
+- CSP com nonce: todo `<script>` leva `nonce="<%= nonce %>"`. Nada de `onsubmit`/`onclick` nem
+  `javascript:` nas telas (a CSP bloqueia); pedir confirmação é com `<form data-confirmar="...">`.
+- Mensagem do WhatsApp: nome e endereço numa linha só e sem `* _ ~ \``; observações vão como citação
+  ("> "). Assim o cliente não consegue escrever um "Total" falso.
+- Carrinho: no máximo 30 carrinhos novos por IP a cada 10 min. Abrir o carrinho vazio não cria sessão.
+- Servidor: em produção o Node escuta só em `127.0.0.1` (o Caddy fica na frente). A prévia do link
+  usa `LOJA_URL` ou o endereço do DuckDNS, nunca o cabeçalho `Host`.
 
 ## Pendências
 

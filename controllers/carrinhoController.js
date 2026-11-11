@@ -13,6 +13,11 @@ const PRAZO_MAXIMO_ENCOMENDA = 365;
 // mandando pedido atrás de pedido (cliente de verdade não chega perto disso)
 const pedidosRecentes = criarLimitador({ maximo: 5, janela: 30 * 60 * 1000 });
 
+// Cada carrinho novo vira uma sessão guardada no banco. Um robô mandando "Adicionar" sem parar
+// encheria o banco, então cada IP abre no máximo 30 carrinhos novos a cada 10 minutos
+// (uma família no mesmo Wi-Fi não chega nem perto disso; quem já tem carrinho não é contado).
+const carrinhosNovos = criarLimitador({ maximo: 30, janela: 10 * 60 * 1000 });
+
 // Pedidos que estão sendo finalizados agora, por sessão. Se o cliente tocar duas vezes em
 // "Enviar pedido", o segundo toque espera o primeiro e vai para o mesmo link do WhatsApp.
 const finalizando = new Map();
@@ -33,6 +38,30 @@ function itemDoCarrinho(produto, quantidade) {
 // Corta textos gigantes que alguém mande direto pro servidor (o formulário já limita)
 function limitar(texto, maximo) {
     return String(texto || '').trim().slice(0, maximo);
+}
+
+// O WhatsApp usa *asterisco* para negrito. Sem isso no texto do cliente, ele não consegue
+// imitar as linhas do pedido (ex: escrever "*Total: R$ 0,01*" no nome ou nas observações).
+const FORMATACAO_DO_WHATSAPP = /[*_~`]/g;
+
+// Nome e endereço: uma linha só, sem os símbolos de formatação do WhatsApp
+function textoDeUmaLinha(texto, maximo) {
+    return limitar(String(texto || '').replace(FORMATACAO_DO_WHATSAPP, '').replace(/\s+/g, ' '), maximo);
+}
+
+// Observações: pode ter várias linhas (sem formatação e sem um monte de linhas em branco)
+function textoDeVariasLinhas(texto, maximo) {
+    return limitar(String(texto || '')
+        .replace(FORMATACAO_DO_WHATSAPP, '')
+        .replace(/\r\n?/g, '\n')
+        .replace(/[^\S\n]+/g, ' ')
+        .replace(/\n{3,}/g, '\n\n'), maximo);
+}
+
+// Na mensagem, cada linha das observações vai como citação ("> "): fica claro que é texto do
+// cliente, e não uma linha do pedido
+function comoCitacao(texto) {
+    return texto.split('\n').map(linha => '> ' + linha.trim()).join('\n');
 }
 
 function renderizarCarrinho(res, carrinho, erro = null, cliente = {}) {
@@ -73,7 +102,8 @@ async function sincronizarCarrinho(req) {
             carrinho.push(itemDoCarrinho(produto, quantidade));
         }
     }
-    req.session.carrinho = carrinho;
+    // Só grava se a pessoa já tinha carrinho: abrir o carrinho vazio não cria sessão no banco
+    if (req.session.carrinho) req.session.carrinho = carrinho;
     return { carrinho, ajustados };
 }
 
@@ -93,6 +123,13 @@ class CarrinhoController {
     async adicionarAoCarrinho(req, res) {
         const produtoId = parseInt(req.body.produtoId);
         const querJson = (req.get('Accept') || '').includes('application/json');
+
+        const carrinhoNovo = !req.session.carrinho;
+        if (carrinhoNovo && carrinhosNovos.bloqueado(req.ip)) {
+            if (querJson) return res.status(429).json({ ok: false, motivo: 'muitos' });
+            return res.status(429).send('Muitas tentativas agora. Espere alguns minutos e tente de novo. <a href="/">Voltar para a loja</a>');
+        }
+
         try {
             const produto = await Produto.buscarPorId(produtoId);
             const item = (req.session.carrinho || []).find(item => item.id === produtoId);
@@ -104,7 +141,10 @@ class CarrinhoController {
             else if (produto.estoque !== null && item && item.quantidade >= produto.estoque) motivo = 'limite';
 
             if (!motivo) {
-                if (!req.session.carrinho) req.session.carrinho = [];
+                if (carrinhoNovo) {
+                    req.session.carrinho = [];
+                    carrinhosNovos.registrar(req.ip);
+                }
                 if (item) {
                     item.quantidade += 1;
                 } else {
@@ -155,7 +195,7 @@ class CarrinhoController {
                 if (req.body.acao === 'remover') item.quantidade = 0;
             }
 
-            req.session.carrinho = carrinho.filter(item => item.quantidade > 0);
+            if (req.session.carrinho) req.session.carrinho = carrinho.filter(item => item.quantidade > 0);
             res.redirect('/carrinho');
         } catch (error) {
             console.error(error);
@@ -164,7 +204,7 @@ class CarrinhoController {
     }
 
     limparCarrinho(req, res) {
-        req.session.carrinho = [];
+        if (req.session.carrinho) req.session.carrinho = [];
         res.redirect('/carrinho');
     }
 
@@ -191,12 +231,12 @@ class CarrinhoController {
             }
 
             const cliente = {
-                nome: limitar(req.body.nome, 80),
+                nome: textoDeUmaLinha(req.body.nome, 80),
                 entrega: req.body.entrega === 'entrega' ? 'entrega' : 'retirada',
-                endereco: limitar(req.body.endereco, 300),
+                endereco: textoDeUmaLinha(req.body.endereco, 300),
                 pagamento: PAGAMENTOS.includes(req.body.pagamento) ? req.body.pagamento : '',
                 dataEncomenda: limitar(req.body.dataEncomenda, 10),
-                observacoes: limitar(req.body.observacoes, 500)
+                observacoes: textoDeVariasLinhas(req.body.observacoes, 500)
             };
 
             const prontaEntrega = carrinho.filter(item => item.tipo !== 'encomenda');
@@ -243,7 +283,7 @@ class CarrinhoController {
                 ? `*Entrega no endereço:* ${cliente.endereco}\n`
                 : `*Vou retirar no local*\n`;
             texto += `*Pagamento:* ${cliente.pagamento}\n`;
-            if (cliente.observacoes) texto += `*Observações:* ${cliente.observacoes}\n`;
+            if (cliente.observacoes) texto += `*Observações:*\n${comoCitacao(cliente.observacoes)}\n`;
             if (cliente.pagamento === 'Pix' && loja.pix) texto += `\n*Chave Pix da loja:* ${loja.pix}\n`;
 
             // Guarda uma cópia no painel da chef (aba Pedidos)

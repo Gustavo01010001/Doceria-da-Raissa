@@ -68,7 +68,7 @@ fi
 sudo tee /etc/caddy/Caddyfile >/dev/null <<EOF
 $DOMINIO {
     encode gzip
-    reverse_proxy localhost:$PORTA_APP
+    reverse_proxy 127.0.0.1:$PORTA_APP
 }
 EOF
 sudo systemctl enable caddy

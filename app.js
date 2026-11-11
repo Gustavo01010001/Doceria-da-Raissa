@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // No servidor, as senhas ficam no arquivo .env (que não vai para o GitHub)
 try {
@@ -32,24 +33,30 @@ app.set('trust proxy', 1);
 // Não conta pra quem visita que o site é feito em Express
 app.disable('x-powered-by');
 
-// As fontes do Google são a única coisa de fora que as páginas carregam
-const POLITICA_DE_CONTEUDO = [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' data: https://fonts.gstatic.com",
-    "img-src 'self' data: blob:",
-    "connect-src 'self'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "frame-ancestors 'none'"
-].join('; ');
+// As fontes do Google são a única coisa de fora que as páginas carregam.
+// Scripts: só rodam os <script> da página que trazem o "nonce" (um código novo a cada página).
+// Se um dia algum texto escapar sem tratamento e virar <script>, o navegador não roda.
+function politicaDeConteudo(nonce) {
+    return [
+        "default-src 'self'",
+        `script-src 'self' 'nonce-${nonce}'`,
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' data: https://fonts.gstatic.com",
+        "img-src 'self' data: blob:",
+        "connect-src 'self'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "frame-ancestors 'none'"
+    ].join('; ');
+}
 
 // Cabeçalhos de segurança: outro site não consegue abrir a loja ou o painel dentro de um iframe,
-// o navegador não "adivinha" o tipo dos arquivos e só carrega scripts do próprio site
+// o navegador não "adivinha" o tipo dos arquivos e só roda os scripts do próprio site
 app.use((req, res, next) => {
+    // As telas usam assim: <script nonce="<%= nonce %>">
+    res.locals.nonce = crypto.randomBytes(16).toString('base64');
     res.set({
-        'Content-Security-Policy': POLITICA_DE_CONTEUDO,
+        'Content-Security-Policy': politicaDeConteudo(res.locals.nonce),
         'X-Frame-Options': 'DENY',
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -130,7 +137,8 @@ app.use(async (req, res, next) => {
     const carrinho = req.session.carrinho || [];
     res.locals.quantidadeCarrinho = carrinho.reduce((soma, item) => soma + item.quantidade, 0);
     res.locals.totalCarrinho = carrinho.reduce((soma, item) => soma + (item.preco * item.quantidade), 0);
-    res.locals.urlBase = `${req.protocol}://${req.get('host')}`;
+    // No servidor o endereço é fixo (não confia no que vem no pedido, que pode ser falsificado)
+    res.locals.urlBase = loja.url || `${req.protocol}://${req.get('host')}`;
     next();
 });
 
@@ -160,7 +168,11 @@ app.use((erro, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+// No servidor, o site só atende o próprio computador (127.0.0.1): quem vem da internet passa
+// obrigatoriamente pelo Caddy (HTTPS). Assim ninguém fala com o Node direto pela porta 3000
+// fingindo outro IP. No PC de casa (sem HOST) atende a rede toda, pra testar no celular pelo Wi-Fi.
+const HOST = process.env.HOST || (producao ? '127.0.0.1' : undefined);
+app.listen(PORT, HOST, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Acesse: http://localhost:${PORT}`);
 });

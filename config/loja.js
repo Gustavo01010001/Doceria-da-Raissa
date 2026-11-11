@@ -11,6 +11,9 @@ module.exports = {
     pix: process.env.LOJA_PIX || '18996469830',
     // Quantos dias de antecedência a chef precisa para fazer uma encomenda
     antecedenciaEncomenda: parseInt(process.env.LOJA_ANTECEDENCIA_ENCOMENDA || '2'),
+    // Endereço do site (usado na prévia do link no WhatsApp/Instagram). No servidor sai sozinho do
+    // DuckDNS do .env; vazio = usa o endereço que aparece no navegador (bom no PC de casa).
+    url: process.env.LOJA_URL || (process.env.DUCKDNS_SUBDOMINIO ? `https://${process.env.DUCKDNS_SUBDOMINIO}.duckdns.org` : ''),
 
     adminUsuario: process.env.ADMIN_USUARIO || 'admin',
     adminSenha: process.env.ADMIN_SENHA || 'senha123',

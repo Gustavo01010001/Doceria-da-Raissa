@@ -291,15 +291,20 @@ button, input, textarea, select { font-family: inherit; }
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    padding: 2px 2px 6px;
-    margin: 0 auto 18px;
+    /* folga em volta para a área de toque dos botões (abaixo) não ser cortada pela rolagem */
+    padding: 6px 4px 8px;
+    margin: -4px auto 16px;
     justify-content: safe center;
     scrollbar-width: none;
 }
 
 .filtros::-webkit-scrollbar { display: none; }
 
+/* Área de toque invisível de 44px em volta do botão (o desenho continua pequeno e delicado) */
+.filtro::before { content: ''; position: absolute; inset: -6px -3px; }
+
 .filtro {
+    position: relative;
     flex-shrink: 0;
     border: 1px solid var(--cor-borda);
     background: var(--cor-card);
@@ -471,6 +476,7 @@ button, input, textarea, select { font-family: inherit; }
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    overflow-wrap: anywhere; /* nome comprido sem espaço quebra a linha em vez de sair do cartão */
 }
 
 .produto-info h3 {
@@ -643,6 +649,7 @@ form { margin: 0; }
     box-shadow: var(--sombra);
     padding: 16px;
     margin-bottom: 16px;
+    overflow-wrap: anywhere; /* texto comprido sem espaço quebra a linha em vez de sair da caixa */
 }
 
 .caixa h2 {
@@ -776,6 +783,7 @@ form { margin: 0; }
 
 .opcoes label {
     margin: 0;
+    min-height: 44px;
     font-weight: 700;
     font-size: 14px;
     border: 1px solid var(--cor-campo-borda);

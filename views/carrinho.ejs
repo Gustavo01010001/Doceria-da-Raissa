@@ -136,7 +136,7 @@
                 <i class="ph-bold ph-plus"></i> Adicionar mais doces
             </a>
 
-            <form action="/carrinho/esvaziar" method="POST" onsubmit="return confirm('Esvaziar o carrinho?');">
+            <form action="/carrinho/esvaziar" method="POST" data-confirmar="Esvaziar o carrinho?">
                 <button type="submit" class="btn btn-texto">
                     <i class="ph ph-trash"></i> Esvaziar carrinho
                 </button>
@@ -155,7 +155,13 @@
 
     </main>
 
-    <script>
+    <script nonce="<%= nonce %>">
+        // "Esvaziar carrinho" pergunta antes: <form data-confirmar="...">
+        document.addEventListener('submit', (evento) => {
+            const pergunta = evento.target.dataset && evento.target.dataset.confirmar;
+            if (pergunta && !confirm(pergunta)) evento.preventDefault();
+        });
+
         // Depois do primeiro toque em "Enviar pedido", trava o botão pra não enviar duas vezes.
         // Ao voltar do WhatsApp para esta página, o botão destrava.
         const formPedido = document.getElementById('form-pedido');

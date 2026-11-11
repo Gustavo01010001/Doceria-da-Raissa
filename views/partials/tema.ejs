@@ -1,5 +1,5 @@
 <button type="button" class="btn-tema <%= typeof embutido !== 'undefined' && embutido ? 'embutido' : '' %>" id="btn-tema" aria-label="Mudar tema"><i class="ph-bold ph-moon"></i></button>
-<script>
+<script nonce="<%= nonce %>">
     (function () {
         const botao = document.getElementById('btn-tema');
         const escuroDoSistema = window.matchMedia('(prefers-color-scheme: dark)');

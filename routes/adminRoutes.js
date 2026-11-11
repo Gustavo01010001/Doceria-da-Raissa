@@ -27,6 +27,13 @@ const upload = multer({
     }
 });
 
+// Mensagem de erro com um "Voltar" que volta para o formulário com o que já tinha sido digitado.
+// O script leva o nonce (a proteção CSP só deixa rodar scripts com ele); sem script, vai pro painel.
+function erroComVoltar(res, mensagem) {
+    res.status(400).send(`${mensagem} <a href="/admin" id="voltar">Voltar</a>
+<script nonce="${res.locals.nonce}">document.getElementById('voltar').addEventListener('click', (e) => { e.preventDefault(); history.back(); });</script>`);
+}
+
 // Mostra uma mensagem amigável se a foto for grande demais ou não for foto
 const receberImagem = (req, res, next) => {
     upload.single('imagem')(req, res, (err) => {
@@ -34,7 +41,7 @@ const receberImagem = (req, res, next) => {
             let mensagem = 'Não consegui receber a foto. Tente de novo.';
             if (err.code === 'LIMIT_FILE_SIZE') mensagem = 'A foto precisa ter no máximo 8 MB.';
             if (err.code === 'NAO_E_IMAGEM') mensagem = 'Esse arquivo não é uma foto. Envie uma imagem JPG, PNG ou WEBP.';
-            return res.status(400).send(`${mensagem} <a href="javascript:history.back()">Voltar</a>`);
+            return erroComVoltar(res, mensagem);
         }
         next();
     });
@@ -55,7 +62,7 @@ const salvarImagem = async (req, res, next) => {
         next();
     } catch (err) {
         console.error(err);
-        res.status(400).send('Não consegui abrir essa foto. Tente uma em JPG ou PNG. <a href="javascript:history.back()">Voltar</a>');
+        erroComVoltar(res, 'Não consegui abrir essa foto. Tente uma em JPG ou PNG.');
     }
 };
 
