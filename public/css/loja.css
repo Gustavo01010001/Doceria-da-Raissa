@@ -1,7 +1,10 @@
 /* Estilo das páginas que os clientes veem (vitrine, carrinho, login) */
 
 :root {
-    --cor-primaria: #e91e63;
+    --cor-primaria: #d81b60;
+    /* Fundo dos botões rosa (texto branco por cima): igual no claro e no escuro, pra dar leitura */
+    --cor-botao: #d81b60;
+    --cor-botao-hover: #c2185b;
     --cor-primaria-escura: #c2185b;
     --cor-secundaria: #ffb6c1;
     --cor-rosa-claro: #ffe4ec;
@@ -27,7 +30,7 @@
 /* Modo escuro: segue o celular/PC do cliente, a não ser que ele escolha no botão 🌙/☀️ */
 @media (prefers-color-scheme: dark) {
     :root:not([data-tema="claro"]) {
-        --cor-primaria: #ec407a;
+        --cor-primaria: #f06292;
         --cor-primaria-escura: #f48fb1;
         --cor-secundaria: #3d2530;
         --cor-rosa-claro: #3a2430;
@@ -50,7 +53,7 @@
 }
 
 :root[data-tema="escuro"] {
-    --cor-primaria: #ec407a;
+    --cor-primaria: #f06292;
     --cor-primaria-escura: #f48fb1;
     --cor-secundaria: #3d2530;
     --cor-rosa-claro: #3a2430;
@@ -244,7 +247,7 @@ button, input, textarea, select { font-family: inherit; }
 .aba i { font-size: 17px; }
 
 .aba.ativa {
-    background: var(--cor-primaria);
+    background: var(--cor-botao);
     color: white;
 }
 
@@ -492,7 +495,7 @@ form { margin: 0; }
 .btn-comprar {
     width: 100%;
     padding: 11px 10px;
-    background-color: var(--cor-primaria);
+    background-color: var(--cor-botao);
     color: white;
     border: none;
     border-radius: 999px;
@@ -506,9 +509,9 @@ form { margin: 0; }
     transition: background-color 0.2s, transform 0.1s;
 }
 
-.btn-comprar:hover { background-color: var(--cor-primaria-escura); }
+.btn-comprar:hover { background-color: var(--cor-botao-hover); }
 .btn-comprar:active { transform: scale(0.97); }
-.btn-comprar:disabled { background: var(--cor-desabilitado); cursor: not-allowed; transform: none; }
+.btn-comprar:disabled { background: var(--cor-desabilitado); color: var(--cor-texto); cursor: not-allowed; transform: none; }
 
 .vazio {
     grid-column: 1 / -1;
@@ -549,13 +552,13 @@ form { margin: 0; }
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    background: var(--cor-primaria);
+    background: var(--cor-botao);
     color: white;
     text-decoration: none;
     padding: 14px 20px;
     border-radius: 999px;
     font-weight: 800;
-    box-shadow: 0 8px 20px rgba(233, 30, 99, 0.35);
+    box-shadow: 0 8px 20px rgba(216, 27, 96, 0.35);
 }
 
 .barra-carrinho .contador {
@@ -566,7 +569,7 @@ form { margin: 0; }
 
 .barra-carrinho .contador span {
     background: white;
-    color: var(--cor-primaria);
+    color: var(--cor-botao);
     min-width: 24px;
     height: 24px;
     border-radius: 999px;
@@ -732,7 +735,7 @@ form { margin: 0; }
 .campo textarea:focus {
     outline: none;
     border-color: var(--cor-primaria);
-    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.12);
+    box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.12);
 }
 
 .campo textarea { resize: vertical; }
@@ -778,7 +781,7 @@ form { margin: 0; }
 }
 
 .opcoes label:has(input:focus-visible) {
-    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.2);
+    box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.2);
 }
 
 .erro-msg {
@@ -816,10 +819,10 @@ form { margin: 0; }
 .btn i { font-size: 20px; }
 
 .btn-whatsapp { background-color: var(--cor-whatsapp); color: white; }
-.btn:disabled { background: var(--cor-desabilitado); cursor: not-allowed; }
-.btn-principal { background-color: var(--cor-primaria); color: white; }
+.btn:disabled { background: var(--cor-desabilitado); color: var(--cor-texto); cursor: not-allowed; }
+.btn-principal { background-color: var(--cor-botao); color: white; }
 .btn-secundario { background-color: var(--cor-card); color: var(--cor-texto); border: 1px solid var(--cor-borda); }
-.btn-texto { background: none; color: var(--cor-texto-suave); font-size: 14px; font-weight: 700; padding: 10px; }
+.btn-texto { background: none; color: var(--cor-texto-suave); font-size: 14px; font-weight: 700; padding: 10px; min-height: 44px; }
 
 .carrinho-vazio {
     text-align: center;
