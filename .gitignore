@@ -4,3 +4,5 @@ node_modules/
 backups/
 # Fotos enviadas pela chef (ficam só no servidor e entram no backup.sh)
 public/uploads/*
+# Mapa do código gerado pelo graphify (refazer com /graphify .)
+graphify-out/
