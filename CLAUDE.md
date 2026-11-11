@@ -83,8 +83,11 @@ npm run dev            # mesmo, com nodemon (reinicia sozinho)
 ## Pendências
 
 - **Hospedagem:** a conta na Oracle Cloud não deu certo. O plano é o **Azure for Students**
-  (sem cartão, e-mail da faculdade, VM B1s) ou o Google Cloud e2-micro (pede cartão).
-  O `instalar.sh` serve para qualquer VM Ubuntu; o `DEPLOY.md` ainda fala da Oracle e precisa ser adaptado.
+  (sem cartão, e-mail da faculdade). **VM criada em 11/11/2026:** `doceria`, Chile Central (Brasil/EUA
+  bloqueiam as máquinas grátis nesta conta), Standard_B2ats_v2, Ubuntu 24.04, IP `68.211.122.223`,
+  `ssh -i ~/.ssh/doceria azureuser@68.211.122.223`. O `instalar.sh` cria swap de 1 GB.
+  Falta: DuckDNS (o Gustavo cria e pega o token), preencher o `.env` no servidor e rodar o instalador.
+  Plano B sem custo: PC velho em casa + Tailscale Funnel ou Cloudflare Tunnel.
 - **Limite de unidades por pedido:** um pedido ainda pode levar o estoque todo de um doce.
   É regra da loja: perguntar ao Gustavo/Raissa antes de inventar um número.
 - 3 fotos antigas (`public/uploads/*.jpg`) estão no git desde antes do `.gitignore`. Não é risco; deixar.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Instala e coloca a doceria no ar num servidor Ubuntu (Oracle Cloud).
+# Instala e coloca a doceria no ar num servidor Ubuntu (Azure for Students, ou qualquer VM Ubuntu).
 # Uso, dentro da pasta do projeto:  bash deploy/instalar.sh
 # Pode rodar de novo quantas vezes quiser (ex: depois de mudar o .env).
 set -euo pipefail
@@ -21,6 +21,16 @@ if [[ "${ADMIN_SENHA:-}" == troque* || "${SESSION_SECRET:-}" == troque* || "${DU
 fi
 DOMINIO="$DUCKDNS_SUBDOMINIO.duckdns.org"
 PORTA_APP="${PORT:-3000}"
+
+# Máquinas pequenas (1 GB, como a B1s da Azure) travam no "npm ci" sem memória extra: cria 1 GB de swap
+if ! swapon --show | grep -q .; then
+    echo "==> Criando 1 GB de memória extra (swap)"
+    sudo fallocate -l 1G /swapfile
+    sudo chmod 600 /swapfile
+    sudo mkswap /swapfile >/dev/null
+    sudo swapon /swapfile
+    grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+fi
 
 echo "==> 1/7 Pacotes do sistema"
 sudo apt-get update -y
