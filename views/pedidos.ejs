@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-    <link rel="stylesheet" href="/css/admin-tema.css">
+    <link rel="stylesheet" href="/css/icones.css?v=<%= versao %>">
+    <link rel="stylesheet" href="/css/admin-tema.css?v=<%= versao %>">
     <%- include('partials/tema-inicial') %>
 
     <style>
@@ -82,7 +82,7 @@
             font-size: 13px;
             font-weight: 500;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
         }
         .filtro:hover { border-color: var(--borda-forte); color: var(--text-main); }
         .filtro.ativo { background: var(--btn-bg); border-color: var(--btn-bg); color: var(--btn-texto); }
@@ -152,7 +152,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: all 0.2s;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
         }
         .btn-action:hover { background: var(--superficie-suave); border-color: var(--borda-forte); }
         .btn-action.cancelar { color: var(--danger-text); border-color: transparent; background: transparent; }
@@ -167,7 +167,7 @@
             color: var(--text-muted);
             font-size: 14px;
         }
-        .vazio i { font-size: 40px; display: block; margin-bottom: 12px; }
+        .vazio i { font-size: 40px; display: block; margin: 0 auto 12px; }
 
         @media (max-width: 640px) {
             .container { margin: 24px auto; padding: 0 16px; }

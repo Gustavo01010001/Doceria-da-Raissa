@@ -21,7 +21,7 @@
                     <div class="item">
                         <div class="item-foto">
                             <% if (item.imagem) { %>
-                                <img src="<%= item.imagem %>" alt="<%= item.nome %>">
+                                <img src="<%= miniatura(item.imagem) %>" alt="<%= item.nome %>" width="56" height="56" decoding="async">
                             <% } else { %>
                                 🍰
                             <% } %>

@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 // No servidor, as senhas ficam no arquivo .env (que não vai para o GitHub)
 try {
@@ -13,6 +14,9 @@ const loja = require('./config/loja');
 const SessaoStore = require('./config/sessaoStore');
 const Configuracao = require('./models/configuracaoModel');
 const { formatarPreco, formatarData, formatarDataHora } = require('./utils/formatar');
+const { caminhoDaMiniatura, gerarMiniatura } = require('./utils/miniatura');
+
+const producao = process.env.NODE_ENV === 'production';
 
 // Online, não deixa o site subir com a senha padrão que está no GitHub
 if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_SENHA || !process.env.SESSION_SECRET)) {
@@ -28,12 +32,12 @@ app.set('trust proxy', 1);
 // Não conta pra quem visita que o site é feito em Express
 app.disable('x-powered-by');
 
-// Fontes do Google e ícones do unpkg são as únicas coisas de fora que as páginas carregam
+// As fontes do Google são a única coisa de fora que as páginas carregam
 const POLITICA_DE_CONTEUDO = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://unpkg.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
-    "font-src 'self' data: https://fonts.gstatic.com https://unpkg.com",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' data: https://fonts.gstatic.com",
     "img-src 'self' data: blob:",
     "connect-src 'self'",
     "object-src 'none'",
@@ -42,7 +46,7 @@ const POLITICA_DE_CONTEUDO = [
 ].join('; ');
 
 // Cabeçalhos de segurança: outro site não consegue abrir a loja ou o painel dentro de um iframe,
-// o navegador não "adivinha" o tipo dos arquivos e só carrega scripts daqui e do unpkg
+// o navegador não "adivinha" o tipo dos arquivos e só carrega scripts do próprio site
 app.use((req, res, next) => {
     res.set({
         'Content-Security-Policy': POLITICA_DE_CONTEUDO,
@@ -62,7 +66,36 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 // As fotos dos doces nunca mudam (foto nova = arquivo novo), então o navegador pode guardar por 30 dias
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'), { maxAge: '30d', immutable: true }));
+
+// Cópia pequena da foto para a vitrine, o carrinho e o painel. É criada na primeira vez que
+// alguém pede e fica guardada em public/uploads/mini (aí quem serve é a linha de cima).
+app.get('/uploads/mini/:arquivo', async (req, res, next) => {
+    const achado = /^([\w-]+)\.webp$/.exec(req.params.arquivo);
+    if (!achado) return next();
+    try {
+        const arquivo = await gerarMiniatura(achado[1]);
+        if (!arquivo) return next();
+        res.sendFile(arquivo, { maxAge: '30d', immutable: true });
+    } catch (erro) {
+        console.error(erro);
+        next();
+    }
+});
+
+// Os links dos estilos levam ?v=... (muda quando o arquivo muda), então online o navegador
+// pode guardar por 30 dias sem risco de mostrar um visual antigo
+const PASTA_CSS = path.join(__dirname, 'public/css');
+app.locals.versao = Math.round(Math.max(...fs.readdirSync(PASTA_CSS).map(arquivo => fs.statSync(path.join(PASTA_CSS, arquivo)).mtimeMs))).toString(36);
+app.use('/css', express.static(PASTA_CSS, { maxAge: producao ? '30d' : 0 }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// No PC de desenvolvimento, avisa se alguma tela usa um ícone que ainda não foi gerado
+if (!producao) {
+    const faltando = require('./scripts/gerar-icones').iconesFaltando();
+    if (faltando.length > 0) {
+        console.warn(`Ícones sem desenho: ${faltando.join(', ')}. Rode "npm run icones" para gerar.`);
+    }
+}
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -84,6 +117,7 @@ app.locals.loja = loja;
 app.locals.formatarPreco = formatarPreco;
 app.locals.formatarData = formatarData;
 app.locals.formatarDataHora = formatarDataHora;
+app.locals.miniatura = caminhoDaMiniatura;
 app.use(async (req, res, next) => {
     // Loja pausada pela chef: a vitrine e o carrinho param de aceitar pedidos
     try {

@@ -3,6 +3,7 @@ const path = require('path');
 const Produto = require('../models/produtoModel');
 const Configuracao = require('../models/configuracaoModel');
 const { converterPreco } = require('../utils/formatar');
+const { arquivoDaMiniatura } = require('../utils/miniatura');
 
 // Tamanho máximo dos textos do produto (o formulário também limita)
 const MAXIMO_NOME = 80;
@@ -38,6 +39,7 @@ function caminhoDaImagem(arquivo) {
 function apagarImagem(caminho) {
     if (!caminho || !caminho.startsWith('/uploads/')) return;
     fs.unlink(path.join(__dirname, '../public', caminho), () => {});
+    fs.unlink(arquivoDaMiniatura(caminho), () => {});
 }
 
 class AdminController {

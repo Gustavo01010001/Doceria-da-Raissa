@@ -207,3 +207,9 @@ input[type="text"], textarea { background-color: var(--card-bg); }
 @media (max-width: 640px) {
     body:has(> .btn-tema:not(.embutido)) { padding-top: 60px; }
 }
+
+/* Desempenho: sem animações para quem pediu "menos movimento" ou está num aparelho fraco (modo leve) */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+:root[data-leve] *, :root[data-leve] *::before, :root[data-leve] *::after { animation: none !important; transition: none !important; }

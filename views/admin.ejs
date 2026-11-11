@@ -8,8 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
-    <link rel="stylesheet" href="/css/admin-tema.css">
+    <link rel="stylesheet" href="/css/icones.css?v=<%= versao %>">
+    <link rel="stylesheet" href="/css/admin-tema.css?v=<%= versao %>">
     <%- include('partials/tema-inicial') %>
     
     <style>
@@ -120,7 +120,7 @@
             align-items: center;
             gap: 6px;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
         }
         .btn-action:hover { background: var(--superficie-suave); border-color: var(--borda-forte); }
 
@@ -244,7 +244,7 @@
                         <div class="produto-info">
                             <div class="img-wrapper">
                                 <% if (produto.imagem) { %>
-                                    <img src="<%= produto.imagem %>" alt="<%= produto.nome %>">
+                                    <img src="<%= miniatura(produto.imagem) %>" alt="<%= produto.nome %>" loading="lazy" decoding="async">
                                 <% } else { %>
                                     <i class="ph ph-image"></i>
                                 <% } %>

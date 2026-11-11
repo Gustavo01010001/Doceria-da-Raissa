@@ -861,3 +861,24 @@ form { margin: 0; }
 
 .cartao-centro .campo { text-align: left; }
 .cartao-centro .emoji { font-size: 44px; }
+
+/* ===== Desempenho em celulares fracos ===== */
+
+/* Quem pediu "menos movimento" no celular ou no PC não vê animações */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Modo leve: ligado sozinho em aparelhos com pouca memória (ver partials/tema-inicial.ejs).
+   Tira sombras, animações e o filtro cinza das fotos, que são o que mais pesa pra desenhar.
+   No lugar da sombra entra uma borda fina, pra os cartões continuarem separados do fundo. */
+:root[data-leve] { --sombra: none; }
+:root[data-leve] *, :root[data-leve] *::before, :root[data-leve] *::after { animation: none !important; transition: none !important; }
+:root[data-leve] .produto-card,
+:root[data-leve] .caixa,
+:root[data-leve] .cartao-centro,
+:root[data-leve] .abas { border: 1px solid var(--cor-borda); }
+:root[data-leve] .produto-card:hover { transform: none; box-shadow: none; }
+:root[data-leve] .barra-carrinho a { box-shadow: none; }
+:root[data-leve] .produto-card.esgotado .produto-foto img,
+:root[data-leve] .produto-card.esgotado .produto-sem-foto { filter: none; opacity: 0.45; }

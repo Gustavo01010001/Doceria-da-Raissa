@@ -66,12 +66,12 @@
 
         <div class="grid-cardapio">
             <% if (produtosDaAba.length > 0) { %>
-                <% produtosDaAba.forEach(function(produto) { %>
+                <% produtosDaAba.forEach(function(produto, posicao) { %>
                     <div class="produto-card <%= produto.disponivel ? '' : 'esgotado' %>" data-categoria="<%= produto.categoria || '' %>">
 
                         <div class="produto-foto">
                             <% if (produto.imagem) { %>
-                                <img src="<%= produto.imagem %>" alt="<%= produto.nome %>" loading="lazy">
+                                <img src="<%= miniatura(produto.imagem) %>" alt="<%= produto.nome %>" width="600" height="600" decoding="async" <%- abaAtiva === aba.id && posicao < 4 ? 'fetchpriority="high"' : 'loading="lazy"' %>>
                             <% } else { %>
                                 <div class="produto-sem-foto">🍰</div>
                             <% } %>
