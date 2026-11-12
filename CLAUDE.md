@@ -86,7 +86,10 @@ npm run dev            # mesmo, com nodemon (reinicia sozinho)
   (sem cartão, e-mail da faculdade). **VM criada em 11/11/2026:** `doceria`, Chile Central (Brasil/EUA
   bloqueiam as máquinas grátis nesta conta), Standard_B2ats_v2, Ubuntu 24.04, IP `68.211.122.223`,
   `ssh -i ~/.ssh/doceria azureuser@68.211.122.223`. O `instalar.sh` cria swap de 1 GB.
-  Falta: DuckDNS (o Gustavo cria e pega o token), preencher o `.env` no servidor e rodar o instalador.
+  **No ar desde 12/11/2026 em https://doceriarubio.duckdns.org** (nome "Doceria Rubio", Instagram
+  @raissa_rubio). Banco e fotos do PC foram levados pro servidor: **a partir daí os dados de verdade
+  ficam no servidor**; o `doceria.sqlite` do PC virou cópia antiga. Backup diário às 3h no servidor.
+  Senha da chef e token do DuckDNS apareceram em prints na conversa: recomendado trocar os dois.
   Plano B sem custo: PC velho em casa + Tailscale Funnel ou Cloudflare Tunnel.
 - **Limite de unidades por pedido:** um pedido ainda pode levar o estoque todo de um doce.
   É regra da loja: perguntar ao Gustavo/Raissa antes de inventar um número.
