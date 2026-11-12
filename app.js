@@ -2,9 +2,12 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-// No servidor, as senhas ficam no arquivo .env (que não vai para o GitHub)
+// No servidor, as senhas ficam no arquivo .env (que não vai para o GitHub).
+// O .env sempre vence: se o PM2 guardou um valor antigo (ex: a senha de antes da troca),
+// o que está escrito no arquivo agora é o que vale ao reiniciar.
 try {
-    process.loadEnvFile(path.join(__dirname, '.env'));
+    const valores = require('util').parseEnv(fs.readFileSync(path.join(__dirname, '.env'), 'utf8'));
+    Object.assign(process.env, valores);
 } catch (erro) {
     // Sem .env (no PC de desenvolvimento): usa os valores padrão de config/loja.js
 }

@@ -117,13 +117,25 @@ ssh -i "$env:USERPROFILE\.ssh\doceria" azureuser@68.211.122.223 "pm2 restart doc
 
 ## No dia a dia
 
-| Quero... | Comando (dentro do servidor, na pasta `doceria`) |
+No PC do Gustavo existe o atalho **`ssh doceria`** (em `C:\Users\Gustavo\.ssh\config`): ele já sabe o IP,
+o usuário e a chave, e mantém a conexão viva (não cai no meio do `nano`). Todos os comandos abaixo são pra
+colar no **PowerShell do PC**:
+
+| Quero... | Comando |
 |---|---|
-| Atualizar o site depois de mudar o código no GitHub | `bash deploy/atualizar.sh` |
-| Ver erros / o que está acontecendo | `pm2 logs doceria` |
-| Ver se o site está ligado | `pm2 status` |
-| Trocar a senha da chef | `nano .env` e depois `pm2 restart doceria` |
-| Fazer um backup agora | `bash deploy/backup.sh` |
+| **Trocar a senha da chef / esqueci a senha** | `ssh -t doceria "bash doceria/deploy/trocar-senha.sh"` |
+| Atualizar o site depois de mudar o código no GitHub | `ssh doceria "cd doceria && bash deploy/atualizar.sh"` |
+| Ver erros / o que está acontecendo | `ssh doceria "pm2 logs doceria --lines 50 --nostream"` |
+| Ver se o site está ligado | `ssh doceria "pm2 status"` |
+| Mudar outra coisa do `.env` (ex: WhatsApp) | `ssh -t doceria "nano doceria/.env && pm2 restart doceria"` |
+| Fazer um backup agora | `ssh doceria "cd doceria && bash deploy/backup.sh"` |
+
+**Trocar a senha:** o `trocar-senha.sh` pede a senha nova **duas vezes**, sem mostrar na tela (pode até
+tirar print), troca só essa linha do `.env`, reinicia o site, **testa se a senha nova entra** e zera o
+bloqueio de "muitas tentativas". Não precisa abrir o `nano` pra isso.
+
+> Por que não só `nano .env`? Na primeira instalação o PM2 guardava uma cópia das senhas e a troca no
+> `.env` não valia. Isso foi corrigido (o `.env` sempre vence), mas o script é o jeito mais seguro.
 
 **Backups:** todo dia às 3h é salva uma cópia do banco e das fotos em `backups/`, guardando as últimas 14.
 Como as cópias ficam no próprio servidor, de vez em quando baixe uma pro seu PC:

@@ -14,7 +14,9 @@ if [ ! -f .env ]; then
     exit 1
 fi
 
-set -a; source .env; set +a
+# Lê o .env só para este script (sem "exportar"): assim o PM2 não guarda uma cópia das senhas,
+# e o site sempre lê o .env atual quando reinicia
+source .env
 if [[ "${ADMIN_SENHA:-}" == troque* || "${SESSION_SECRET:-}" == troque* || "${DUCKDNS_TOKEN:-}" == cole* || -z "${DUCKDNS_SUBDOMINIO:-}" ]]; then
     echo "Preencha ADMIN_SENHA, SESSION_SECRET, DUCKDNS_SUBDOMINIO e DUCKDNS_TOKEN no .env (nano .env) e rode de novo."
     exit 1

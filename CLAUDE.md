@@ -90,6 +90,10 @@ npm run dev            # mesmo, com nodemon (reinicia sozinho)
   @raissa_rubio). Banco e fotos do PC foram levados pro servidor: **a partir daí os dados de verdade
   ficam no servidor**; o `doceria.sqlite` do PC virou cópia antiga. Backup diário às 3h no servidor.
   Senha da chef e token do DuckDNS apareceram em prints na conversa: recomendado trocar os dois.
+  **Trocar/recuperar a senha da chef:** `ssh -t doceria "bash doceria/deploy/trocar-senha.sh"` (o atalho
+  `ssh doceria` está em `~/.ssh/config` do PC). Nunca pedir pra digitar senha em print/chat.
+  O `.env` sempre vence o que o PM2 guardou (`app.js` usa `util.parseEnv`); o `instalar.sh` não exporta
+  mais as senhas pro PM2 (era isso que fazia a senha nova não valer).
   Plano B sem custo: PC velho em casa + Tailscale Funnel ou Cloudflare Tunnel.
 - **Limite de unidades por pedido:** um pedido ainda pode levar o estoque todo de um doce.
   É regra da loja: perguntar ao Gustavo/Raissa antes de inventar um número.
