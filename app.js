@@ -74,6 +74,13 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// No Express 5, um POST sem corpo (ex: robô mandando /login vazio) chega com req.body indefinido,
+// e o código que lê req.body.alguma_coisa quebrava com erro 500. Vazio vira {}.
+// (Nas rotas com foto, o multer põe o corpo dele por cima, igual antes.)
+app.use((req, res, next) => {
+    if (req.body === undefined) req.body = {};
+    next();
+});
 // As fotos dos doces nunca mudam (foto nova = arquivo novo), então o navegador pode guardar por 30 dias
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'), { maxAge: '30d', immutable: true }));
 
