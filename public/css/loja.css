@@ -33,7 +33,7 @@
     --ease-mola: cubic-bezier(0.34, 1.4, 0.64, 1);   /* passa um tiquinho e volta: só em "deu certo" */
     --dur-rapida: 160ms;
     --dur-media: 280ms;
-    --granulado-opacidade: 0.4;
+    --granulado: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 340 112'%3E%3Cg fill='none' stroke-width='4.5' stroke-linecap='round'%3E%3Cpath d='M22 34L32 30' stroke='%23d81b60' stroke-opacity='0.55'/%3E%3Cpath d='M62 12L66 22' stroke='%23ffffff' stroke-opacity='0.95'/%3E%3Cpath d='M96 46L104 53' stroke='%23f06292' stroke-opacity='0.65'/%3E%3Cpath d='M36 80L46 84' stroke='%23ffffff' stroke-opacity='0.95'/%3E%3Cpath d='M88 92L92 102' stroke='%23d81b60' stroke-opacity='0.55'/%3E%3Cpath d='M246 24L254 17' stroke='%23ffffff' stroke-opacity='0.95'/%3E%3Cpath d='M272 58L282 62' stroke='%23d81b60' stroke-opacity='0.55'/%3E%3Cpath d='M246 92L256 96' stroke='%23f06292' stroke-opacity='0.65'/%3E%3Cpath d='M304 84L306 95' stroke='%23ffffff' stroke-opacity='0.95'/%3E%3Cpath d='M286 106L296 102' stroke='%23d81b60' stroke-opacity='0.55'/%3E%3C/g%3E%3C/svg%3E");
     color-scheme: light;
 }
 
@@ -58,7 +58,7 @@
         --cor-erro-texto: #ffb3c0;
         --cor-fundo-transparente: rgba(26, 20, 23, 0);
         --sombra: 0 4px 14px rgba(0, 0, 0, 0.35);
-        --granulado-opacidade: 0.28;
+        --granulado: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 340 112'%3E%3Cg fill='none' stroke-width='4.5' stroke-linecap='round'%3E%3Cpath d='M22 34L32 30' stroke='%23f06292' stroke-opacity='0.55'/%3E%3Cpath d='M62 12L66 22' stroke='%23f3e9ec' stroke-opacity='0.25'/%3E%3Cpath d='M96 46L104 53' stroke='%23ffb6c1' stroke-opacity='0.35'/%3E%3Cpath d='M36 80L46 84' stroke='%23f3e9ec' stroke-opacity='0.25'/%3E%3Cpath d='M88 92L92 102' stroke='%23f06292' stroke-opacity='0.55'/%3E%3Cpath d='M246 24L254 17' stroke='%23f3e9ec' stroke-opacity='0.25'/%3E%3Cpath d='M272 58L282 62' stroke='%23f06292' stroke-opacity='0.55'/%3E%3Cpath d='M246 92L256 96' stroke='%23ffb6c1' stroke-opacity='0.35'/%3E%3Cpath d='M304 84L306 95' stroke='%23f3e9ec' stroke-opacity='0.25'/%3E%3Cpath d='M286 106L296 102' stroke='%23f06292' stroke-opacity='0.55'/%3E%3C/g%3E%3C/svg%3E");
         color-scheme: dark;
     }
 }
@@ -82,7 +82,7 @@
     --cor-erro-texto: #ffb3c0;
     --cor-fundo-transparente: rgba(26, 20, 23, 0);
     --sombra: 0 4px 14px rgba(0, 0, 0, 0.35);
-    --granulado-opacidade: 0.28;
+    --granulado: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 340 112'%3E%3Cg fill='none' stroke-width='4.5' stroke-linecap='round'%3E%3Cpath d='M22 34L32 30' stroke='%23f06292' stroke-opacity='0.55'/%3E%3Cpath d='M62 12L66 22' stroke='%23f3e9ec' stroke-opacity='0.25'/%3E%3Cpath d='M96 46L104 53' stroke='%23ffb6c1' stroke-opacity='0.35'/%3E%3Cpath d='M36 80L46 84' stroke='%23f3e9ec' stroke-opacity='0.25'/%3E%3Cpath d='M88 92L92 102' stroke='%23f06292' stroke-opacity='0.55'/%3E%3Cpath d='M246 24L254 17' stroke='%23f3e9ec' stroke-opacity='0.25'/%3E%3Cpath d='M272 58L282 62' stroke='%23f06292' stroke-opacity='0.55'/%3E%3Cpath d='M246 92L256 96' stroke='%23ffb6c1' stroke-opacity='0.35'/%3E%3Cpath d='M304 84L306 95' stroke='%23f3e9ec' stroke-opacity='0.25'/%3E%3Cpath d='M286 106L296 102' stroke='%23f06292' stroke-opacity='0.55'/%3E%3C/g%3E%3C/svg%3E");
     color-scheme: dark;
 }
 
@@ -904,39 +904,27 @@ form { margin: 0; }
    Animações só mexem em transform e opacity (leves pro celular) e somem com "reduzir movimento"
    e no modo leve (regras no fim do arquivo). */
 
-/* Granulado discreto nas laterais do topo (desenho fixo, não anima) */
-.topo { position: relative; isolation: isolate; }
-
-.topo::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    opacity: var(--granulado-opacidade);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cg fill='none' stroke-linecap='round' stroke-width='5'%3E%3Cpath d='M18 22l10 6' stroke='%23d81b60'/%3E%3Cpath d='M70 14l-4 11' stroke='%23ffffff'/%3E%3Cpath d='M112 30l11-3' stroke='%23f06292'/%3E%3Cpath d='M40 64l3 11' stroke='%23ffffff'/%3E%3Cpath d='M96 74l-9 7' stroke='%23d81b60'/%3E%3Cpath d='M128 96l-2 11' stroke='%23ffffff'/%3E%3Cpath d='M20 108l11 2' stroke='%23f06292'/%3E%3Cpath d='M64 118l8-8' stroke='%23d81b60'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 140px 140px;
-    /* só nas beiradas, pra não ficar atrás do nome e do texto */
-    -webkit-mask-image: linear-gradient(90deg, #000 0, transparent 24%, transparent 76%, #000 100%);
-    mask-image: linear-gradient(90deg, #000 0, transparent 24%, transparent 76%, #000 100%);
+/* Granulado: uns poucos, à mão, em volta do cupcake (como se tivessem caído na cobertura).
+   Desenho fixo e centralizado: não se repete em grade e fica longe do nome e do botão do tema.
+   Fica no fundo do próprio topo, por cima do degradê. */
+.topo {
+    position: relative;
+    isolation: isolate;
+    background:
+        var(--granulado) no-repeat center calc(14px + env(safe-area-inset-top, 0px)) / 340px 112px,
+        linear-gradient(180deg, var(--cor-secundaria) 0%, var(--cor-rosa-claro) 62%, var(--cor-fundo) 100%);
+    /* um pouco mais de espaço embaixo, pra cor ir se misturando com o fundo da página sem emenda */
+    padding-bottom: 56px;
 }
 
-/* Borda de babado (como a forminha de papel do doce) embaixo do topo */
-.topo, .topo-simples { --cor-babado: var(--cor-rosa-claro); }
-.topo-simples { --cor-babado: var(--cor-secundaria); position: relative; }
-
-.topo::after,
-.topo-simples::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 100%;
-    height: 10px;
-    pointer-events: none;
-    background: radial-gradient(circle at 10px 0, var(--cor-babado) 9.5px, transparent 10px) repeat-x;
-    background-size: 20px 10px;
+/* Carrinho: o topo baixinho também se dissolve no fundo, em vez de terminar numa borda */
+.topo-simples {
+    background: linear-gradient(180deg, var(--cor-secundaria) 0%, var(--cor-secundaria) 50%, var(--cor-fundo) 100%);
+    padding-bottom: 34px;
 }
+
+/* O topo já traz a folga embaixo (a parte que se dissolve): o primeiro item da vitrine vem logo depois */
+.topo + .container > :first-child { margin-top: 4px; }
 
 /* Abas: a pílula rosa desliza de uma aba para a outra (navegadores que entendem :has) */
 @supports selector(:has(*)) {
@@ -1048,16 +1036,12 @@ form { margin: 0; }
 ::view-transition-old(root),
 ::view-transition-new(root) { animation-duration: 220ms; }
 
-/* Troca de tema: o modo novo entra varrendo na diagonal (igual ao vídeo de apresentação) */
-html.trocando-tema::view-transition-old(root) { animation: none; }
+/* Troca de tema (claro ⇄ escuro): a tela inteira se mistura devagar de um tema pro outro,
+   sem borda passando. É só opacidade (a mais leve de animar), meio segundo. */
+html.trocando-tema::view-transition-old(root),
 html.trocando-tema::view-transition-new(root) {
-    animation: tema-varre 600ms var(--ease-saida);
-    mix-blend-mode: normal;
-}
-
-@keyframes tema-varre {
-    from { clip-path: polygon(0 0, 0 0, -30% 100%, -30% 100%); }
-    to { clip-path: polygon(0 0, 130% 0, 100% 100%, -30% 100%); }
+    animation-duration: 500ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===== Desempenho em celulares fracos ===== */
