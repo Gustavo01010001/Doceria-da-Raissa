@@ -19,11 +19,30 @@
             }
         }
 
-        botao.addEventListener('click', () => {
+        function trocarTema() {
             const novoTema = temaAtual() === 'escuro' ? 'claro' : 'escuro';
             document.documentElement.dataset.tema = novoTema;
             try { localStorage.setItem('tema', novoTema); } catch (erro) {}
             atualizarBotao();
+        }
+
+        botao.addEventListener('click', () => {
+            // Navegador novo, sem "reduzir movimento" e fora do modo leve: o tema novo entra
+            // varrendo a tela na diagonal. Nos outros casos troca na hora, como antes.
+            const raiz = document.documentElement;
+            const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!document.startViewTransition || semMovimento || raiz.dataset.leve) {
+                trocarTema();
+                return;
+            }
+            raiz.classList.add('trocando-tema');
+            try {
+                const transicao = document.startViewTransition(trocarTema);
+                transicao.finished.finally(() => raiz.classList.remove('trocando-tema'));
+            } catch (erro) {
+                raiz.classList.remove('trocando-tema');
+                trocarTema();
+            }
         });
 
         escuroDoSistema.addEventListener('change', atualizarBotao);

@@ -68,7 +68,7 @@
         <div class="grid-cardapio">
             <% if (produtosDaAba.length > 0) { %>
                 <% produtosDaAba.forEach(function(produto, posicao) { %>
-                    <div class="produto-card <%= produto.disponivel ? '' : 'esgotado' %>" data-categoria="<%= produto.categoria || '' %>">
+                    <div class="produto-card <%= produto.disponivel ? '' : 'esgotado' %>" data-categoria="<%= produto.categoria || '' %>" style="--i: <%= posicao %>">
 
                         <div class="produto-foto">
                             <% if (produto.imagem) { %>
@@ -145,10 +145,26 @@
         function atualizarBarra(dados) {
             document.getElementById('qtd-carrinho').textContent = dados.quantidade;
             document.getElementById('total-carrinho').textContent = 'R$ ' + dados.total.toFixed(2).replace('.', ',');
+            const estavaEscondida = barra.hidden;
             barra.hidden = dados.quantidade === 0;
             barra.classList.remove('pulo');
-            void barra.offsetWidth; // reinicia a animação
-            barra.classList.add('pulo');
+            // Na primeira vez a barra sobe sozinha (CSS); depois disso ela só dá um pulinho
+            if (!estavaEscondida) {
+                void barra.offsetWidth; // reinicia a animação
+                barra.classList.add('pulo');
+            }
+        }
+
+        // "Adicionar" vira "Adicionado!" por um instante e depois volta ao normal
+        function mostrarAdicionado(botao) {
+            if (!botao.dataset.textoOriginal) botao.dataset.textoOriginal = botao.innerHTML;
+            botao.innerHTML = '<i class="ph-bold ph-check" aria-hidden="true"></i> Adicionado!';
+            botao.classList.add('adicionado');
+            clearTimeout(botao.timerAdicionado);
+            botao.timerAdicionado = setTimeout(() => {
+                botao.innerHTML = botao.dataset.textoOriginal;
+                botao.classList.remove('adicionado');
+            }, 1400);
         }
 
         // Troca de aba sem recarregar a página (o link ?aba=... continua funcionando)
@@ -207,6 +223,7 @@
                 evento.preventDefault();
                 const botao = form.querySelector('button');
                 botao.disabled = true;
+                botao.classList.add('carregando');
                 try {
                     const resposta = await fetch(form.action, {
                         method: 'POST',
@@ -217,6 +234,7 @@
                     if (!dados) throw new Error();
                     if (dados.ok) {
                         atualizarBarra(dados);
+                        mostrarAdicionado(botao);
                         mostrarAviso(dados.nome + ' adicionado! 🧁');
                     } else if (dados.motivo === 'muitos') {
                         mostrarAviso('Muitas tentativas agora. Espere uns minutinhos e tente de novo.');
@@ -231,6 +249,7 @@
                     mostrarAviso('Não deu certo, tente de novo.');
                 } finally {
                     botao.disabled = false;
+                    botao.classList.remove('carregando');
                 }
             });
         });
