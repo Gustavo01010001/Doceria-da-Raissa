@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
-    "icones": "node scripts/gerar-icones.js"
+    "icones": "node scripts/gerar-icones.js",
+    "granulado": "node scripts/gerar-granulado.js"
   },
   "keywords": [],
   "author": "",

@@ -56,6 +56,8 @@ npm run dev            # mesmo, com nodemon (reinicia sozinho)
 - `middlewares/auth.js`: login do painel, CSRF e resposta 401 em JSON.
 - `utils/`: `formatar.js` (preço, datas), `limitador.js` (limite por IP), `miniatura.js` (fotos de 600px).
 - `views/`: telas EJS. `partials/tema-inicial.ejs` aplica o tema e liga o "modo leve".
+  `partials/granulado.ejs` (granulado do topo da vitrine) é gerado por `scripts/gerar-granulado.js`
+  (`npm run granulado`): não editar à mão. A chuva de granulado toca uma vez por visita.
 - `public/css/`: `loja.css` (loja), `admin-tema.css` (painel), `icones.css` (gerado, não editar).
 - `scripts/gerar-icones.js`: gera `icones.css`. **Usou ícone novo numa tela? Rode `npm run icones`.**
 - `deploy/`: `instalar.sh` (Ubuntu: Node, Caddy/HTTPS, DuckDNS, PM2, backup), `atualizar.sh`, `backup.sh`.

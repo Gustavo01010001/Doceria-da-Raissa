@@ -13,4 +13,9 @@
             document.documentElement.dataset.leve = 'sim';
         }
     } catch (erro) {}
+
+    // A chuva de granulado do topo da vitrine toca uma vez por visita (a vitrine marca quando já tocou)
+    try {
+        if (sessionStorage.getItem('granulado-visto')) document.documentElement.dataset.granulado = 'visto';
+    } catch (erro) {}
 </script>

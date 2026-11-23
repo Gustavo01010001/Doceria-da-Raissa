@@ -9,6 +9,7 @@
     <%- include('partials/tema') %>
 
     <header class="topo">
+        <%- include('partials/granulado') %>
         <div class="topo-logo">🧁</div>
         <h1><%= loja.nome %></h1>
         <p><%= loja.slogan %></p>
@@ -131,6 +132,9 @@
     <div class="aviso" id="aviso" role="status" aria-live="polite"></div>
 
     <script nonce="<%= nonce %>">
+        // A chuva de granulado do topo já tocou nesta visita: nas próximas vezes ele aparece parado
+        try { sessionStorage.setItem('granulado-visto', '1'); } catch (erro) {}
+
         const barra = document.getElementById('barra-carrinho');
         const aviso = document.getElementById('aviso');
         let timerAviso;
