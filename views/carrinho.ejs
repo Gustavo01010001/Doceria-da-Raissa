@@ -9,54 +9,78 @@
     <header class="topo-simples">
         <div class="container">
             <a href="/" class="btn-icone" aria-label="Voltar ao cardápio"><i class="ph-bold ph-arrow-left"></i></a>
-            <h1><i class="ph-fill ph-shopping-cart"></i> Seu Carrinho</h1>
+            <h1>Seu carrinho</h1>
         </div>
     </header>
 
     <main class="carrinho-container">
 
         <% if (carrinho.length > 0) { %>
-            <div class="caixa">
-                <% carrinho.forEach(item => { %>
-                    <div class="item">
-                        <div class="item-foto">
-                            <% if (item.imagem) { %>
-                                <img src="<%= miniatura(item.imagem) %>" alt="<%= item.nome %>" width="56" height="56" decoding="async">
-                            <% } else { %>
-                                🍰
-                            <% } %>
-                        </div>
+            <% const totalDeDoces = carrinho.reduce((soma, item) => soma + item.quantidade, 0); %>
 
-                        <div class="item-info">
-                            <strong><%= item.nome %><% if (item.tipo === 'encomenda') { %> <span class="selo-encomenda">Encomenda</span><% } %></strong>
-                            <small><%= formatarPreco(item.preco) %> cada</small>
+            <div id="avisos">
+                <% if (erro) { %>
+                    <div class="erro-msg" role="alert"><i class="ph-bold ph-warning-circle"></i> <%= erro %></div>
+                <% } %>
+            </div>
+
+            <!-- 1. Os doces escolhidos -->
+            <section class="caixa" id="caixa-pedido" aria-labelledby="titulo-pedido">
+                <div class="caixa-topo">
+                    <h2 id="titulo-pedido">
+                        <span class="passo">1</span> Seu pedido
+                        <small class="contagem" id="contagem"><%= totalDeDoces %> <%= totalDeDoces === 1 ? 'doce' : 'doces' %></small>
+                    </h2>
+                    <form action="/carrinho/esvaziar" method="POST" data-confirmar="Esvaziar o carrinho?">
+                        <button type="submit" class="btn-esvaziar">Esvaziar</button>
+                    </form>
+                </div>
+
+                <ul class="itens">
+                    <% carrinho.forEach(item => { %>
+                        <% const noLimite = item.estoque !== null && item.estoque !== undefined && item.quantidade >= item.estoque; %>
+                        <li class="item" data-id="<%= item.id %>">
+                            <div class="item-foto">
+                                <% if (item.imagem) { %>
+                                    <img src="<%= miniatura(item.imagem) %>" alt="" width="72" height="72" decoding="async">
+                                <% } else { %>
+                                    🍰
+                                <% } %>
+                            </div>
+
+                            <div class="item-info">
+                                <strong class="item-nome"><%= item.nome %><% if (item.tipo === 'encomenda') { %> <span class="selo-encomenda">Encomenda</span><% } %></strong>
+                                <span class="item-preco"><%= formatarPreco(item.preco) %> cada</span>
+                            </div>
+
+                            <span class="item-subtotal"><%= formatarPreco(item.preco * item.quantidade) %></span>
+
                             <form action="/carrinho/quantidade" method="POST" class="quantidade">
                                 <input type="hidden" name="produtoId" value="<%= item.id %>">
-                                <button type="submit" name="acao" value="menos" aria-label="Diminuir"><i class="ph-bold ph-minus"></i></button>
-                                <span class="numero"><%= item.quantidade %></span>
-                                <% const noLimite = item.estoque !== null && item.estoque !== undefined && item.quantidade >= item.estoque; %>
-                                <button type="submit" name="acao" value="mais" aria-label="<%= noLimite ? 'Aumentar (já pegou tudo que tem em estoque)' : 'Aumentar' %>" <%= noLimite ? 'disabled' : '' %>><i class="ph-bold ph-plus"></i></button>
-                                <button type="submit" name="acao" value="remover" class="remover" aria-label="Remover"><i class="ph ph-trash"></i></button>
+                                <button type="submit" name="acao" value="remover" class="remover" aria-label="Remover <%= item.nome %>"><i class="ph ph-trash"></i> Remover</button>
+                                <div class="contador" role="group" aria-label="Quantidade de <%= item.nome %>">
+                                    <button type="submit" name="acao" value="menos" aria-label="Diminuir"><i class="ph-bold ph-minus"></i></button>
+                                    <span class="numero"><%= item.quantidade %></span>
+                                    <button type="submit" name="acao" value="mais" aria-label="<%= noLimite ? 'Aumentar (já pegou tudo que tem em estoque)' : 'Aumentar' %>" <%= noLimite ? 'disabled' : '' %>><i class="ph-bold ph-plus"></i></button>
+                                </div>
                             </form>
-                        </div>
+                        </li>
+                    <% }) %>
+                </ul>
 
-                        <span class="item-subtotal"><%= formatarPreco(item.preco * item.quantidade) %></span>
-                    </div>
-                <% }) %>
+                <a href="/" class="link-mais"><i class="ph-bold ph-plus"></i> Adicionar mais doces</a>
 
                 <div class="total">
                     <span>Total</span>
-                    <span><%= formatarPreco(total) %></span>
+                    <strong id="total-pedido"><%= formatarPreco(total) %></strong>
                 </div>
-            </div>
+            </section>
 
             <form action="/carrinho/finalizar" method="POST" id="form-pedido">
-                <div class="caixa">
-                    <h2><i class="ph-bold ph-user"></i> Seus dados</h2>
 
-                    <% if (erro) { %>
-                        <div class="erro-msg"><i class="ph-bold ph-warning-circle"></i> <%= erro %></div>
-                    <% } %>
+                <!-- 2. Quem pede e como recebe -->
+                <section class="caixa" style="--i: 1" aria-labelledby="titulo-dados">
+                    <h2 id="titulo-dados"><span class="passo">2</span> Seus dados</h2>
 
                     <div class="campo">
                         <label for="nome">Seu nome</label>
@@ -68,11 +92,21 @@
                         <div class="opcoes" role="radiogroup" aria-labelledby="rotulo-entrega">
                             <label>
                                 <input type="radio" name="entrega" value="retirada" <%= cliente.entrega !== 'entrega' ? 'checked' : '' %>>
-                                <span><i class="ph ph-storefront"></i> Retirar</span>
+                                <span class="opcao">
+                                    <i class="ph-fill ph-check-circle marca" aria-hidden="true"></i>
+                                    <i class="ph ph-storefront" aria-hidden="true"></i>
+                                    Retirar
+                                    <small>Você busca</small>
+                                </span>
                             </label>
                             <label>
                                 <input type="radio" name="entrega" value="entrega" <%= cliente.entrega === 'entrega' ? 'checked' : '' %>>
-                                <span><i class="ph ph-moped"></i> Entrega</span>
+                                <span class="opcao">
+                                    <i class="ph-fill ph-check-circle marca" aria-hidden="true"></i>
+                                    <i class="ph ph-moped" aria-hidden="true"></i>
+                                    Entrega
+                                    <small>Levamos até você</small>
+                                </span>
                             </label>
                         </div>
                     </div>
@@ -84,7 +118,7 @@
                     </div>
 
                     <% if (temEncomenda) { %>
-                        <div class="campo">
+                        <div class="campo" id="campo-data">
                             <label for="dataEncomenda">Para quando é a encomenda?</label>
                             <input type="date" id="dataEncomenda" name="dataEncomenda" value="<%= cliente.dataEncomenda || '' %>" min="<%= dataMinima %>" max="<%= dataMaxima %>" data-hoje="<%= hoje %>" aria-describedby="erro-data dica-data" required>
                             <div class="erro-campo" id="erro-data" role="alert" hidden></div>
@@ -93,67 +127,92 @@
                     <% } %>
 
                     <div class="campo">
-                        <span class="rotulo" id="rotulo-pagamento">Forma de pagamento</span>
-                        <div class="opcoes" role="radiogroup" aria-labelledby="rotulo-pagamento">
+                        <label for="observacoes">Observações <span class="opcional">(opcional)</span></label>
+                        <textarea id="observacoes" name="observacoes" rows="2" placeholder="Ex: horário de preferência, sem granulado..." maxlength="500"><%= cliente.observacoes || '' %></textarea>
+                    </div>
+                </section>
+
+                <!-- 3. Como paga -->
+                <% const iconesPagamento = { 'Pix': 'ph ph-pix-logo', 'Dinheiro': 'ph ph-money', 'Cartão': 'ph ph-credit-card' }; %>
+                <section class="caixa" style="--i: 2" aria-labelledby="titulo-pagamento">
+                    <h2 id="titulo-pagamento"><span class="passo">3</span> Pagamento</h2>
+
+                    <div class="campo">
+                        <span class="rotulo so-leitor" id="rotulo-pagamento">Forma de pagamento</span>
+                        <div class="opcoes opcoes-3" role="radiogroup" aria-labelledby="rotulo-pagamento">
                             <% pagamentos.forEach(pagamento => { %>
                                 <label>
                                     <input type="radio" name="pagamento" value="<%= pagamento %>" <%= cliente.pagamento === pagamento ? 'checked' : '' %> required>
-                                    <span><%= pagamento %></span>
+                                    <span class="opcao">
+                                        <i class="ph-fill ph-check-circle marca" aria-hidden="true"></i>
+                                        <i class="<%= iconesPagamento[pagamento] || 'ph ph-wallet' %>" aria-hidden="true"></i>
+                                        <%= pagamento %>
+                                    </span>
                                 </label>
                             <% }) %>
                         </div>
                         <% if (loja.pix) { %>
-                            <div class="dica" id="dica-pix" <%= cliente.pagamento === 'Pix' ? '' : 'hidden' %>>
-                                Chave Pix: <strong id="chave-pix"><%= loja.pix %></strong>
+                            <div class="pix" id="dica-pix" <%= cliente.pagamento === 'Pix' ? '' : 'hidden' %>>
+                                <div>
+                                    <span class="pix-rotulo">Chave Pix</span>
+                                    <strong id="chave-pix"><%= loja.pix %></strong>
+                                </div>
                                 <button type="button" class="btn-copiar" id="btn-copiar-pix"><i class="ph-bold ph-copy"></i> Copiar</button>
-                                <br>Ela também vai junto na mensagem do pedido.
+                                <p class="pix-nota">Ela também vai junto na mensagem do pedido.</p>
                             </div>
                         <% } %>
                     </div>
+                </section>
 
-                    <div class="campo">
-                        <label for="observacoes">Observações <span style="font-weight: 400; color: var(--cor-texto-suave);">(opcional)</span></label>
-                        <textarea id="observacoes" name="observacoes" rows="2" placeholder="Ex: horário de preferência, sem granulado..." maxlength="500"><%= cliente.observacoes || '' %></textarea>
+                <div class="envio" style="--i: 3">
+                    <div class="envio-total">
+                        <span>Total do pedido</span>
+                        <strong id="total-envio"><%= formatarPreco(total) %></strong>
                     </div>
+
+                    <% if (pausa.pausada) { %>
+                        <div class="erro-msg">
+                            <i class="ph-bold ph-moon-stars"></i>
+                            Não estamos aceitando pedidos no momento.<%= pausa.recado ? ' ' + pausa.recado : '' %>
+                        </div>
+                        <button type="button" class="btn btn-whatsapp" disabled>
+                            <i class="ph-bold ph-whatsapp-logo"></i> Pedidos pausados
+                        </button>
+                    <% } else { %>
+                        <button type="submit" class="btn btn-whatsapp">
+                            <i class="ph-bold ph-whatsapp-logo"></i> Enviar pedido pelo WhatsApp
+                        </button>
+                        <p class="envio-nota">O WhatsApp abre com o pedido já escrito. É só enviar a mensagem.</p>
+                    <% } %>
                 </div>
-
-                <% if (pausa.pausada) { %>
-                    <div class="erro-msg">
-                        <i class="ph-bold ph-moon-stars"></i>
-                        Não estamos aceitando pedidos no momento.<%= pausa.recado ? ' ' + pausa.recado : '' %>
-                    </div>
-                    <button type="button" class="btn btn-whatsapp" disabled>
-                        <i class="ph-bold ph-whatsapp-logo"></i> Pedidos pausados
-                    </button>
-                <% } else { %>
-                    <button type="submit" class="btn btn-whatsapp">
-                        <i class="ph-bold ph-whatsapp-logo"></i> Enviar pedido pelo WhatsApp
-                    </button>
-                <% } %>
-            </form>
-
-            <a href="/" class="btn btn-secundario">
-                <i class="ph-bold ph-plus"></i> Adicionar mais doces
-            </a>
-
-            <form action="/carrinho/esvaziar" method="POST" data-confirmar="Esvaziar o carrinho?">
-                <button type="submit" class="btn btn-texto">
-                    <i class="ph ph-trash"></i> Esvaziar carrinho
-                </button>
             </form>
 
         <% } else { %>
             <div class="carrinho-vazio">
-                <i class="ph-light ph-shopping-bag"></i>
-                <p>Seu carrinho está vazio.</p>
+                <!-- Cestinha com granulado caindo em volta (o mesmo do topo da vitrine) -->
+                <div class="vazio-desenho" aria-hidden="true">
+                    <span class="vazio-circulo"><i class="ph-light ph-basket"></i></span>
+                    <i class="ga" style="--x:-92;--y:-24;--a:24;--l:15;--d:120;--t:760;--q:90;--s:-160"></i>
+                    <i class="gb" style="--x:-70;--y:46;--a:-38;--l:13;--d:260;--t:820;--q:120;--s:210"></i>
+                    <i class="ga bola" style="--x:-44;--y:-76;--a:0;--l:8;--d:40;--t:700;--q:70;--s:0"></i>
+                    <i class="gb" style="--x:60;--y:-68;--a:-58;--l:14;--d:180;--t:740;--q:80;--s:180"></i>
+                    <i class="ga" style="--x:96;--y:-8;--a:70;--l:13;--d:300;--t:860;--q:110;--s:-220"></i>
+                    <i class="gb bola" style="--x:80;--y:54;--a:0;--l:7;--d:220;--t:800;--q:120;--s:0"></i>
+                    <i class="ga" style="--x:20;--y:84;--a:-12;--l:12;--d:340;--t:880;--q:140;--s:150"></i>
+                    <i class="gb" style="--x:-104;--y:16;--a:84;--l:11;--d:90;--t:720;--q:100;--s:-130"></i>
+                </div>
+                <h2>Seu carrinho está vazio</h2>
+                <p>Escolha seus doces no cardápio e eles aparecem aqui.</p>
+                <a href="/" class="btn btn-principal">
+                    <i class="ph-bold ph-cake"></i> Ver o cardápio
+                </a>
             </div>
-
-            <a href="/" class="btn btn-principal">
-                <i class="ph-bold ph-cake"></i> Ver o cardápio
-            </a>
         <% } %>
 
     </main>
+
+    <!-- Avisa quem usa leitor de tela quando a quantidade muda (sem recarregar a página) -->
+    <p class="so-leitor" id="status-carrinho" role="status"></p>
 
     <script nonce="<%= nonce %>">
         // "Esvaziar carrinho" pergunta antes: <form data-confirmar="...">
@@ -162,13 +221,202 @@
             if (pergunta && !confirm(pergunta)) evento.preventDefault();
         });
 
+        // Animações feitas pelo JavaScript respeitam o "reduzir movimento" e o modo leve
+        function podeAnimar() {
+            return Boolean(Element.prototype.animate)
+                && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                && !document.documentElement.dataset.leve;
+        }
+
+        // ===== Quantidade sem recarregar a página =====
+        // O "+", o "−" e o "Remover" mandam o pedido por trás e só atualizam os números na tela.
+        // Assim o que a cliente já digitou (nome, endereço...) não se perde. Os toques entram numa
+        // fila e vão um de cada vez, na ordem. Sem JavaScript, os botões funcionam do jeito antigo
+        // (a página recarrega). Se a internet cair, aparece um aviso e nada muda; qualquer outro
+        // problema recarrega o carrinho, pra tela mostrar exatamente o que está guardado.
+        const pendentes = new Map(); // id do doce -> toques esperando resposta
+        let fila = Promise.resolve();
+        let desistiu = false;
+
+        function temToquePendente() {
+            return [...pendentes.values()].some(quantos => quantos > 0);
+        }
+
+        function marcarPendentes() {
+            document.querySelectorAll('.item').forEach(linha => {
+                linha.classList.toggle('atualizando', (pendentes.get(linha.dataset.id) || 0) > 0);
+            });
+        }
+
+        function avisar(texto) {
+            const avisos = document.getElementById('avisos');
+            if (!avisos) return;
+            const aviso = document.createElement('div');
+            aviso.className = 'erro-msg';
+            aviso.setAttribute('role', 'alert');
+            aviso.textContent = texto;
+            avisos.replaceChildren(aviso);
+        }
+
+        function recarregarCarrinho() {
+            desistiu = true;
+            location.href = '/carrinho';
+        }
+
+        // Pulinho no número que mudou
+        function pular(elemento, escala) {
+            if (!podeAnimar()) return;
+            elemento.animate(
+                [{ transform: 'scale(1)' }, { transform: `scale(${escala})`, offset: 0.35 }, { transform: 'scale(1)' }],
+                { duration: 340, easing: 'ease-out' }
+            );
+        }
+
+        // A linha do doce removido primeiro desliza pro lado e some; depois o espaço dela fecha
+        async function sumir(linha) {
+            if (!podeAnimar()) return;
+            const estilo = getComputedStyle(linha);
+            const cheia = {
+                height: linha.offsetHeight + 'px',
+                paddingTop: estilo.paddingTop,
+                paddingBottom: estilo.paddingBottom,
+                borderBottomWidth: estilo.borderBottomWidth
+            };
+            linha.style.overflow = 'hidden';
+            const animacao = linha.animate([
+                { ...cheia, opacity: 1, transform: 'none', easing: 'ease-out' },
+                { ...cheia, opacity: 0, transform: 'translateX(-16px)', offset: 0.4, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' },
+                { height: '0px', paddingTop: '0px', paddingBottom: '0px', borderBottomWidth: '0px', opacity: 0, transform: 'translateX(-16px)' }
+            ], { duration: 380, fill: 'forwards' });
+            await animacao.finished.catch(() => {});
+        }
+
+        // Coloca na tela o carrinho que o servidor devolveu
+        async function aplicar(nova) {
+            const caixaNova = nova.getElementById('caixa-pedido');
+
+            // O carrinho ficou vazio: troca o conteúdo todo pela versão vazia
+            if (!caixaNova) {
+                const principalNovo = nova.querySelector('main');
+                if (!principalNovo || !principalNovo.querySelector('.carrinho-vazio')) throw new Error('resposta inesperada');
+                const linhas = [...document.querySelectorAll('#caixa-pedido .item')];
+                await Promise.all(linhas.map(sumir));
+                const trocar = () => document.querySelector('main').replaceWith(document.importNode(principalNovo, true));
+                if (podeAnimar() && document.startViewTransition) await document.startViewTransition(trocar).updateCallbackDone;
+                else trocar();
+                return;
+            }
+
+            // Doces que saíram do carrinho
+            const idsNovos = new Set([...caixaNova.querySelectorAll('.item')].map(linha => linha.dataset.id));
+            const saindo = [...document.querySelectorAll('#caixa-pedido .item')].filter(linha => !idsNovos.has(linha.dataset.id));
+            await Promise.all(saindo.map(sumir));
+            saindo.forEach(linha => linha.remove());
+
+            // Doces que continuam: troca só textos e botões (o botão que a pessoa usa não perde o foco)
+            for (const linhaNova of caixaNova.querySelectorAll('.item')) {
+                const linha = document.querySelector(`#caixa-pedido .item[data-id="${linhaNova.dataset.id}"]`);
+                if (!linha) throw new Error('doce novo na lista');
+                const numero = linha.querySelector('.numero');
+                const numeroNovo = linhaNova.querySelector('.numero').textContent;
+                const mudou = numero.textContent !== numeroNovo;
+                linha.querySelector('.item-info').innerHTML = linhaNova.querySelector('.item-info').innerHTML;
+                linha.querySelector('.item-subtotal').textContent = linhaNova.querySelector('.item-subtotal').textContent;
+                numero.textContent = numeroNovo;
+                for (const botaoNovo of linhaNova.querySelectorAll('button[value]')) {
+                    const botao = linha.querySelector(`button[value="${botaoNovo.value}"]`);
+                    botao.disabled = botaoNovo.disabled;
+                    botao.setAttribute('aria-label', botaoNovo.getAttribute('aria-label'));
+                }
+                if (mudou) pular(numero, 1.35);
+            }
+
+            // Total, contagem de doces e avisos
+            const total = document.getElementById('total-pedido');
+            const totalNovo = nova.getElementById('total-pedido').textContent;
+            if (total.textContent !== totalNovo) {
+                total.textContent = totalNovo;
+                pular(total, 1.08);
+            }
+            document.getElementById('total-envio').textContent = totalNovo;
+            document.getElementById('contagem').textContent = nova.getElementById('contagem').textContent;
+            document.getElementById('avisos').innerHTML = nova.getElementById('avisos').innerHTML;
+
+            // Saiu a última encomenda: o campo da data não é mais necessário
+            if (!nova.getElementById('dataEncomenda')) {
+                const campoData = document.getElementById('campo-data');
+                if (campoData) campoData.remove();
+            }
+        }
+
+        async function atualizar(id, acao) {
+            const linha = document.querySelector(`.item[data-id="${id}"]`);
+            const nome = linha ? linha.querySelector('.item-nome').firstChild.textContent.trim() : '';
+            let resposta;
+            try {
+                resposta = await fetch('/carrinho/quantidade', {
+                    method: 'POST',
+                    body: new URLSearchParams({ produtoId: id, acao })
+                });
+            } catch (erro) {
+                throw Object.assign(new Error('sem internet'), { semInternet: true });
+            }
+            if (!resposta.ok) throw new Error('erro ' + resposta.status);
+            const nova = new DOMParser().parseFromString(await resposta.text(), 'text/html');
+            pendentes.set(id, Math.max(0, (pendentes.get(id) || 1) - 1));
+            await aplicar(nova);
+            marcarPendentes();
+
+            const linhaAgora = document.querySelector(`.item[data-id="${id}"]`);
+            const status = document.getElementById('status-carrinho');
+            const total = document.getElementById('total-pedido');
+            status.textContent = linhaAgora
+                ? `${nome}: ${linhaAgora.querySelector('.numero').textContent}. Total ${total.textContent}.`
+                : (total ? `${nome} saiu do carrinho. Total ${total.textContent}.` : 'O carrinho ficou vazio.');
+        }
+
+        document.addEventListener('submit', (evento) => {
+            const form = evento.target;
+            const botao = evento.submitter;
+            if (!form.classList.contains('quantidade') || !botao || !window.fetch || !window.DOMParser) return;
+            evento.preventDefault();
+            if (desistiu) return;
+
+            const id = form.elements.produtoId.value;
+            const acao = botao.value;
+            pendentes.set(id, (pendentes.get(id) || 0) + 1);
+            marcarPendentes();
+            fila = fila
+                .then(() => { if (!desistiu) return atualizar(id, acao); })
+                .catch(erro => {
+                    pendentes.set(id, Math.max(0, (pendentes.get(id) || 1) - 1));
+                    marcarPendentes();
+                    if (erro && erro.semInternet) avisar('Não deu pra atualizar o carrinho. Confira a internet e tente de novo.');
+                    else recarregarCarrinho();
+                });
+        });
+
         // Depois do primeiro toque em "Enviar pedido", trava o botão pra não enviar duas vezes.
+        // Se ainda tem um "+" ou "−" a caminho, espera ele chegar antes de enviar.
         // Ao voltar do WhatsApp para esta página, o botão destrava.
         const formPedido = document.getElementById('form-pedido');
         if (formPedido) {
             const botaoEnviar = formPedido.querySelector('button[type="submit"]');
             if (botaoEnviar) {
-                formPedido.addEventListener('submit', () => { botaoEnviar.disabled = true; });
+                formPedido.addEventListener('submit', (evento) => {
+                    if (temToquePendente() && !desistiu) {
+                        evento.preventDefault();
+                        botaoEnviar.disabled = true;
+                        fila.then(() => {
+                            if (desistiu || !document.contains(formPedido)) return;
+                            botaoEnviar.disabled = false;
+                            if (formPedido.requestSubmit) formPedido.requestSubmit(botaoEnviar);
+                            else formPedido.submit();
+                        });
+                        return;
+                    }
+                    botaoEnviar.disabled = true;
+                });
                 window.addEventListener('pageshow', () => { botaoEnviar.disabled = false; });
             }
         }

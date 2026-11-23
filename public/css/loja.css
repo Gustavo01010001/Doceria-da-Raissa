@@ -368,18 +368,17 @@ button, input, textarea, select { font-family: inherit; }
 .btn-copiar {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    margin-left: 6px;
-    padding: 3px 10px;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 14px;
     border: 1px solid var(--cor-primaria);
     border-radius: 999px;
-    background: none;
+    background: var(--cor-card);
     color: var(--cor-primaria);
     font-family: inherit;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
     cursor: pointer;
-    vertical-align: middle;
 }
 
 .selo-encomenda {
@@ -654,7 +653,7 @@ form { margin: 0; }
 .carrinho-container {
     max-width: 600px;
     margin: 0 auto;
-    padding: 20px var(--margem-dir) calc(40px + env(safe-area-inset-bottom, 0px)) var(--margem-esq);
+    padding: 12px var(--margem-dir) calc(40px + env(safe-area-inset-bottom, 0px)) var(--margem-esq);
 }
 
 .caixa {
@@ -662,65 +661,167 @@ form { margin: 0; }
     border-radius: var(--raio);
     box-shadow: var(--sombra);
     padding: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     overflow-wrap: anywhere; /* texto comprido sem espaço quebra a linha em vez de sair da caixa */
 }
 
 .caixa h2 {
-    margin: 0 0 14px;
+    margin: 0 0 16px;
     font-size: 17px;
     font-weight: 800;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+}
+
+/* Número do passo (1, 2, 3) na frente do título de cada caixa: mostra o caminho até o pedido */
+.passo {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--cor-rosa-claro);
+    color: var(--cor-primaria-escura);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+/* Caixa 1: o título com a contagem de doces e o "Esvaziar" do lado */
+.caixa-topo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
 }
 
-.item {
-    display: flex;
+.caixa-topo h2 { margin: 0; }
+.contagem { color: var(--cor-texto-suave); font-size: 13px; font-weight: 700; }
+
+.btn-esvaziar,
+.remover {
+    display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 0;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 999px;
+    background: none;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.btn-esvaziar { margin-right: -10px; flex-shrink: 0; }
+.remover { margin-left: -10px; }
+.remover i { font-size: 17px; }
+.btn-esvaziar:hover,
+.remover:hover { color: var(--cor-erro-texto); }
+
+/* Cada doce: foto | nome e preço | subtotal; embaixo, "Remover" e o contador (− 2 +) */
+.itens { list-style: none; margin: 0; padding: 0; }
+
+.item {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+    grid-template-areas:
+        "foto info subtotal"
+        "foto acoes acoes";
+    column-gap: 12px;
+    row-gap: 4px;
+    padding: 14px 0;
     border-bottom: 1px solid var(--cor-borda);
 }
 
-.item:first-of-type { padding-top: 0; }
-.item:last-of-type { border-bottom: none; }
+.item:last-child { border-bottom: none; }
+
+/* Celular bem estreito: a linha do "Remover" e do contador passa a usar a largura toda */
+@media (max-width: 359px) {
+    .item {
+        grid-template-columns: 60px minmax(0, 1fr) auto;
+        grid-template-areas:
+            "foto info subtotal"
+            "acoes acoes acoes";
+        row-gap: 8px;
+    }
+
+    .item .item-foto { width: 60px; height: 60px; }
+}
 
 .item-foto {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
+    grid-area: foto;
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
     overflow: hidden;
     background: var(--cor-rosa-claro);
-    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
+    font-size: 30px;
+}
+
+/* Contorno bem fraquinho por cima da foto: foto clara não some no fundo branco */
+.item-foto::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgba(58, 42, 47, 0.06);
 }
 
 .item-foto img { width: 100%; height: 100%; object-fit: cover; }
 
-.item-info { flex-grow: 1; min-width: 0; }
-.item-info strong { display: block; font-size: 15px; }
-.item-info small { color: var(--cor-texto-suave); font-size: 13px; }
+.item-info { grid-area: info; min-width: 0; padding-top: 2px; }
+.item-nome { display: block; font-size: 15px; font-weight: 800; line-height: 1.3; }
+.item-preco { display: block; margin-top: 2px; color: var(--cor-texto-suave); font-size: 13px; }
 
-.item-subtotal { font-weight: 800; white-space: nowrap; }
-
-.quantidade {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 6px;
+.item-subtotal {
+    grid-area: subtotal;
+    padding-top: 2px;
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
 }
 
-.quantidade button {
-    position: relative;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid var(--cor-borda);
+/* Números com a mesma largura: o preço não "dança" quando muda */
+.item-preco,
+.item-subtotal,
+.numero,
+.total strong,
+.envio-total strong { font-variant-numeric: tabular-nums; }
+
+.quantidade {
+    grid-area: acoes;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.contador {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px;
+    border: 1px solid var(--cor-campo-borda);
+    border-radius: 999px;
     background: var(--cor-superficie);
+}
+
+.contador button {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
     color: var(--cor-primaria);
     font-size: 16px;
     cursor: pointer;
@@ -730,27 +831,56 @@ form { margin: 0; }
 }
 
 /* Área de toque de 44px no celular, sem aumentar o desenho do botão */
-.quantidade button::before { content: ''; position: absolute; inset: -4px; border-radius: 50%; }
-.quantidade button:hover { background: var(--cor-rosa-claro); }
-.quantidade button:disabled { opacity: 0.35; cursor: not-allowed; }
-.quantidade button:disabled:hover { background: var(--cor-superficie); }
-.quantidade .numero { min-width: 26px; text-align: center; font-weight: 800; }
-.quantidade .remover { border: none; color: var(--cor-texto-suave); margin-left: 6px; }
+.contador button::before { content: ''; position: absolute; inset: -3px; border-radius: 50%; }
+.contador button:hover { background: var(--cor-rosa-claro); }
+.contador button:disabled { opacity: 0.35; cursor: not-allowed; }
+.contador button:disabled:hover { background: transparent; }
+
+.numero {
+    display: inline-block;
+    min-width: 30px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+    transition: opacity var(--dur-rapida) ease;
+}
+
+/* Enquanto o "+" ou o "−" vai até o servidor, o número fica clarinho */
+.item.atualizando .numero { opacity: 0.35; }
+
+.link-mais {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin: 4px 0 0 -10px;
+    padding: 0 12px 0 10px;
+    border-radius: 999px;
+    color: var(--cor-primaria);
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.link-mais:hover { background: var(--cor-rosa-claro); color: var(--cor-primaria-escura); }
 
 .total {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
     border-top: 2px dashed var(--cor-borda);
-    margin-top: 6px;
+    margin-top: 8px;
     padding-top: 14px;
-    font-size: 19px;
+    font-size: 17px;
     font-weight: 800;
 }
 
-.total span:last-child { color: var(--cor-primaria); }
+.total strong { display: inline-block; font-size: 22px; color: var(--cor-primaria); transform-origin: right center; }
 
-.campo { margin-bottom: 14px; }
+/* ---------- Campos (carrinho e login) ---------- */
+
+.campo { margin-bottom: 16px; }
+.caixa > .campo:last-child { margin-bottom: 0; }
 
 .campo label,
 .campo .rotulo {
@@ -783,49 +913,91 @@ form { margin: 0; }
 .campo textarea { resize: vertical; }
 
 .campo .dica { color: var(--cor-texto-suave); font-size: 12px; margin-top: 4px; }
+.opcional { font-weight: 400; color: var(--cor-texto-suave); }
 
 /* Aviso de erro logo abaixo do campo (ex: data da encomenda que já passou) */
 .campo .erro-campo { color: var(--cor-erro-texto); font-size: 13px; font-weight: 700; margin-top: 6px; }
 .campo .erro-campo[hidden] { display: none; }
 .campo input.invalido { border-color: var(--cor-erro-texto); }
 
+/* Opções em cartõezinhos (Retirar/Entrega, Pix/Dinheiro/Cartão): a bolinha do rádio fica
+   escondida e o cartão inteiro é o botão. O escolhido fica rosa e ganha um ✓ no canto. */
 .opcoes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
 }
 
-.opcoes label {
-    margin: 0;
-    min-height: 44px;
-    font-weight: 700;
-    font-size: 14px;
-    border: 1px solid var(--cor-campo-borda);
-    border-radius: 12px;
-    padding: 11px 8px;
-    text-align: center;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    background: var(--cor-superficie);
-}
+.opcoes-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+
+.campo .opcoes label { display: block; margin: 0; cursor: pointer; }
 
 .opcoes input { position: absolute; opacity: 0; pointer-events: none; }
 
-.opcoes input:checked + span {
-    color: var(--cor-primaria-escura);
+.opcao {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 78px;
+    padding: 12px 8px;
+    border: 1px solid var(--cor-campo-borda);
+    border-radius: 14px;
+    background: var(--cor-superficie);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.25;
+    text-align: center;
 }
 
-.opcoes label:has(input:checked) {
+.opcao i { font-size: 24px; color: var(--cor-primaria); margin-bottom: 4px; }
+.opcao small { font-size: 12px; font-weight: 600; color: var(--cor-texto-suave); }
+.opcoes-3 .opcao { min-height: 70px; padding: 10px 4px; }
+
+.opcoes input:checked + .opcao {
     border-color: var(--cor-primaria);
     background: var(--cor-rosa-claro);
+    color: var(--cor-primaria-escura);
+    box-shadow: inset 0 0 0 1px var(--cor-primaria);
 }
 
-.opcoes label:has(input:focus-visible) {
-    box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.2);
+.opcoes input:checked + .opcao i { color: var(--cor-primaria-escura); }
+.opcoes input:checked + .opcao small { color: var(--cor-texto); }
+.opcoes input:focus-visible + .opcao { outline: 3px solid var(--cor-primaria); outline-offset: 2px; }
+
+/* O ✓ do canto aparece com um pulinho quando a opção é escolhida */
+.opcao .marca {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    margin: 0;
+    font-size: 18px;
+    opacity: 0;
+    transform: scale(0.4);
+    transition: opacity var(--dur-rapida) ease, transform var(--dur-media) var(--ease-mola);
 }
+
+.opcoes input:checked + .opcao .marca { opacity: 1; transform: none; }
+
+/* Chave Pix num cartãozinho tracejado, com o botão de copiar do lado */
+.pix {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2px 12px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--cor-fundo);
+    border: 1px dashed var(--cor-campo-borda);
+    border-radius: 14px;
+}
+
+.pix[hidden] { display: none; }
+.pix-rotulo { display: block; color: var(--cor-texto-suave); font-size: 12px; font-weight: 700; }
+.pix strong { display: block; font-size: 15px; overflow-wrap: anywhere; }
+.pix-nota { grid-column: 1 / -1; margin: 6px 0 0; color: var(--cor-texto-suave); font-size: 12px; }
 
 .erro-msg {
     background: var(--cor-erro-fundo);
@@ -838,6 +1010,35 @@ form { margin: 0; }
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* Fim do carrinho: o total de novo, o botão do WhatsApp e o que acontece depois */
+.envio { margin-top: 20px; }
+
+.envio-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0 6px 12px;
+}
+
+.envio-total span { color: var(--cor-texto-suave); font-size: 14px; font-weight: 700; }
+.envio-total strong { font-size: 20px; font-weight: 800; }
+
+.envio .btn { min-height: 56px; font-size: 17px; }
+
+/* Celular bem estreito: o texto do botão cabe numa linha só */
+@media (max-width: 359px) {
+    .envio .btn { font-size: 15px; padding-left: 12px; padding-right: 12px; }
+}
+.envio .btn-whatsapp:not(:disabled) { box-shadow: 0 8px 20px rgba(21, 128, 61, 0.28); }
+
+.envio-nota {
+    margin: 0 12px;
+    text-align: center;
+    color: var(--cor-texto-suave);
+    font-size: 13px;
+    line-height: 1.45;
 }
 
 .btn {
@@ -864,16 +1065,61 @@ form { margin: 0; }
 .btn-whatsapp { background-color: var(--cor-whatsapp); color: white; }
 .btn:disabled { background: var(--cor-desabilitado); color: var(--cor-texto); cursor: not-allowed; }
 .btn-principal { background-color: var(--cor-botao); color: white; }
-.btn-secundario { background-color: var(--cor-card); color: var(--cor-texto); border: 1px solid var(--cor-borda); }
 .btn-texto { background: none; color: var(--cor-texto-suave); font-size: 14px; font-weight: 700; padding: 10px; min-height: 44px; }
 
-.carrinho-vazio {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--cor-texto-suave);
+/* Carrinho vazio: cestinha num círculo, com granulado caindo em volta */
+.carrinho-vazio { text-align: center; padding: 4px 8px 20px; }
+
+.vazio-desenho { position: relative; width: 240px; height: 200px; margin: 0 auto; }
+
+.vazio-circulo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 116px;
+    height: 116px;
+    margin: -58px 0 0 -58px;
+    border-radius: 50%;
+    background: var(--cor-card);
+    box-shadow: var(--sombra);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    color: var(--cor-primaria);
 }
 
-.carrinho-vazio i { font-size: 56px; color: var(--cor-secundaria); }
+.vazio-desenho > i {
+    position: absolute;
+    left: calc(50% + var(--x) * 1px);
+    top: calc(50% + var(--y) * 1px);
+    width: calc(var(--l) * 1px);
+    height: 4.5px;
+    margin: -2.25px 0 0 calc(var(--l) * -0.5px);
+    border-radius: 2.25px;
+    transform: rotate(calc(var(--a) * 1deg));
+    animation: granulado-cai calc(var(--t) * 1ms) calc(var(--d) * 1ms + 120ms) backwards;
+}
+
+.vazio-desenho > i.bola { height: calc(var(--l) * 1px); margin-top: calc(var(--l) * -0.5px); border-radius: 50%; }
+.vazio-desenho .ga { background: var(--granulado-a); }
+.vazio-desenho .gb { background: var(--granulado-b); }
+
+.carrinho-vazio h2 { margin: 0 0 6px; font-size: 20px; font-weight: 800; }
+.carrinho-vazio p { margin: 0 auto 24px; max-width: 280px; color: var(--cor-texto-suave); font-size: 15px; line-height: 1.5; }
+
+/* Texto só para leitor de tela (não aparece na tela) */
+.so-leitor {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
 
 /* ---------- Páginas centralizadas (login, 404) ---------- */
 
@@ -1065,8 +1311,11 @@ form { margin: 0; }
 .topo-links a,
 .btn-icone,
 .filtro,
-.opcoes label,
-.quantidade button,
+.opcao,
+.contador button,
+.remover,
+.btn-esvaziar,
+.link-mais,
 .btn-copiar {
     transition: background-color var(--dur-rapida) ease, border-color var(--dur-rapida) ease, color var(--dur-rapida) ease, transform var(--dur-rapida) var(--ease-saida);
 }
@@ -1078,9 +1327,14 @@ form { margin: 0; }
 .topo-links a:active,
 .btn-icone:active,
 .filtro:active,
-.opcoes label:active,
-.quantidade button:not(:disabled):active,
+.contador button:not(:disabled):active,
+.remover:active,
+.btn-esvaziar:active,
+.link-mais:active,
 .btn-copiar:active { transform: scale(0.95); }
+
+/* Cartão de opção é grande: afunda menos */
+.opcoes label:active .opcao { transform: scale(0.97); }
 
 /* Contorno de foco bem visível pra quem navega pelo teclado */
 :where(a, button, summary, [tabindex]):focus-visible {
@@ -1092,8 +1346,13 @@ form { margin: 0; }
 .campo input:focus-visible,
 .campo textarea:focus-visible { box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.28); }
 
-/* Opções do carrinho (Retirar/Entrega, Pix...): a escolhida ganha um anel */
-.opcoes label:has(input:checked) { box-shadow: inset 0 0 0 1px var(--cor-primaria); }
+/* Carrinho: as caixas sobem em sequência ao abrir a página */
+.carrinho-container .caixa,
+.carrinho-container .envio,
+.carrinho-vazio {
+    animation: card-entra 340ms var(--ease-saida) backwards;
+    animation-delay: calc(var(--i, 0) * 60ms);
+}
 
 /* Troca de página macia (vitrine ⇄ carrinho) nos navegadores que suportam */
 @media (prefers-reduced-motion: no-preference) {
@@ -1128,7 +1387,9 @@ html.trocando-tema::view-transition-new(root) {
 :root[data-leve] .cartao-centro,
 :root[data-leve] .abas { border: 1px solid var(--cor-borda); }
 :root[data-leve] .produto-card:hover { transform: none; box-shadow: none; }
-:root[data-leve] .barra-carrinho a { box-shadow: none; }
+:root[data-leve] .barra-carrinho a,
+:root[data-leve] .envio .btn-whatsapp { box-shadow: none; }
+:root[data-leve] .vazio-circulo { border: 1px solid var(--cor-borda); }
 :root[data-leve] .produto-card.esgotado .produto-foto img,
 :root[data-leve] .produto-card.esgotado .produto-sem-foto { filter: none; opacity: 0.45; }
 :root[data-leve] .abas::before { box-shadow: none; }

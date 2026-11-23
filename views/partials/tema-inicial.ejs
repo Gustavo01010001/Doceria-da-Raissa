@@ -18,4 +18,16 @@
     try {
         if (sessionStorage.getItem('granulado-visto')) document.documentElement.dataset.granulado = 'visto';
     } catch (erro) {}
+
+    // Troca de página macia: às vezes o navegador desiste da animação (ex: depois de enviar um
+    // formulário). Não é erro, a página só abre sem animar; assim o console não acusa nada.
+    function semErroNaTransicao(evento) {
+        const transicao = evento.viewTransition;
+        if (!transicao) return;
+        [transicao.updateCallbackDone, transicao.ready, transicao.finished].forEach(promessa => {
+            if (promessa) promessa.catch(() => {});
+        });
+    }
+    window.addEventListener('pageswap', semErroNaTransicao);
+    window.addEventListener('pagereveal', semErroNaTransicao);
 </script>

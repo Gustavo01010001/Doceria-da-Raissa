@@ -79,6 +79,9 @@ npm run dev            # mesmo, com nodemon (reinicia sozinho)
 - Mensagem do WhatsApp: nome e endereço numa linha só e sem `* _ ~ \``; observações vão como citação
   ("> "). Assim o cliente não consegue escrever um "Total" falso.
 - Carrinho: no máximo 30 carrinhos novos por IP a cada 10 min. Abrir o carrinho vazio não cria sessão.
+- Carrinho na tela: +, − e Remover atualizam sem recarregar (fetch numa fila, um toque por vez), pra não
+  apagar o que a cliente já digitou. "Enviar pedido" espera a fila terminar. Sem JavaScript, os mesmos
+  formulários funcionam do jeito antigo (POST e recarrega). Testar sempre com +, −, Remover e o último doce.
 - Servidor: em produção o Node escuta só em `127.0.0.1` (o Caddy fica na frente). A prévia do link
   usa `LOJA_URL` ou o endereço do DuckDNS, nunca o cabeçalho `Host`.
 

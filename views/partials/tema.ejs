@@ -27,8 +27,8 @@
         }
 
         botao.addEventListener('click', () => {
-            // Navegador novo, sem "reduzir movimento" e fora do modo leve: o tema novo entra
-            // varrendo a tela na diagonal. Nos outros casos troca na hora, como antes.
+            // Navegador novo, sem "reduzir movimento" e fora do modo leve: o tema novo se mistura
+            // devagar com o antigo (meio segundo). Nos outros casos troca na hora, como antes.
             const raiz = document.documentElement;
             const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             if (!document.startViewTransition || semMovimento || raiz.dataset.leve) {
